@@ -58,5 +58,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="password" name="password" required><br>
         <input type="submit" value="Login">
     </form>
+	<div class="form__field">
+    <a href="changePassword.php" class="btn btn--primary">Change Password</a>
+</div>
+
 </body>
 </html>

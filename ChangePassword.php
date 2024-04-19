@@ -1,42 +1,7 @@
 <?php
-require_once 'config.php';
-
-function changePassword($email, $oldPassword, $newPassword) {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $email = $conn->real_escape_string($email);
-    $query = "SELECT password FROM users WHERE email = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->bind_result($hashedPassword);
-    $stmt->fetch();
-
-    if (!$hashedPassword || !password_verify($oldPassword, $hashedPassword)) {
-        return false; 
-    }
-
-    $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-    $updateQuery = "UPDATE users SET password = ? WHERE email = ?";
-    $updateStmt = $conn->prepare($updateQuery);
-    $updateStmt->bind_param("ss", $hashedNewPassword, $email);
-    $result = $updateStmt->execute();
-
-    $updateStmt->close();
-    $stmt->close();
-    $conn->close();
-
-    return $result;
-}
-
 session_start();
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-
     header("Location: login.php");
     exit();
 }
@@ -44,22 +9,47 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $error = false;
 
 if (!empty($_POST['changepassword'])) {
-    if(isset($_SESSION['email'])) {
-        $email = $_SESSION['email'];
-        $oldPassword = $_POST['oldPassword'];
-        $newPassword = $_POST['newPassword'];
+    $email = $_POST['email'];
+    $oldPassword = $_POST['oldPassword'];
+    $newPassword = $_POST['newPassword'];
 
-        if (changePassword($email, $oldPassword, $newPassword)) {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
-            header("Location: index.php"); 
-            exit();
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $query = "SELECT password FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $hashedPassword = $row['password'];
+
+        if (password_verify($oldPassword, $hashedPassword)) {
+            $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $updateQuery = "UPDATE users SET password = ? WHERE email = ?";
+            $updateStmt = $conn->prepare($updateQuery);
+            $updateStmt->bind_param("ss", $hashedNewPassword, $email);
+            $updateResult = $updateStmt->execute();
+
+            if ($updateResult) {
+                $updateStmt->close();
+                $stmt->close();
+                $conn->close();
+                header("Location: index.php");
+                exit();
+            } else {
+                $error = true;
+            }
         } else {
-            $error = true; 
+            $error = true;
         }
     } else {
-
-        header("Location: login.php");
-        exit();
+        $error = true;
     }
 }
 ?>
@@ -82,6 +72,9 @@ if (!empty($_POST['changepassword'])) {
                     <p>Sorry, there was an error changing your password. Please try again.</p>
                 </div>
             <?php endif; ?>
+
+            <input type="hidden" name="email" value="<?php echo $_SESSION['email']; ?>">
+
 
             <div class="form__field">
                 <label for="oldPassword">Old Password</label>
