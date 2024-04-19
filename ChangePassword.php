@@ -2,7 +2,7 @@
 include 'config.php';
 session_start();
 if(isset($_SESSION['user_id']) && $_SESSION['user_role'] == 'user') {
-include 'header.php'; ?>
+?>
 <div id="user_profile-content">
     <div class="container">
         <div class="row">
@@ -53,6 +53,4 @@ include 'header.php'; ?>
         </div>
     </div>
 </div>
-<?php include 'footer.php';
-}
-?>
+
