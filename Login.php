@@ -10,28 +10,39 @@ function canLogin($email, $password) {
     }
 
     $email = $conn->real_escape_string($email);
-    $query = "SELECT password FROM users WHERE email = ?";
+    $query = "SELECT id, password FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
+
+    if (!$stmt) {
+        die("Error preparing statement: " . $conn->error);
+    }
+
     $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->bind_result($hashedPassword);
+    if (!$stmt->execute()) {
+        die("Error executing statement: " . $stmt->error);
+    }
+
+    $stmt->bind_result($id, $hashedPassword);
     $stmt->fetch();
 
     if (!$hashedPassword || !password_verify($password, $hashedPassword)) {
         return false; 
     }
 
+    $_SESSION['loggedin'] = true;
+    $_SESSION['email'] = $email;
+    $_SESSION['user_id'] = $id; // Set the user_id session variable
+
     return true;
 }
+
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
     if (canLogin($email, $password)) {
-
-        $_SESSION['loggedin'] = true;
-        $_SESSION['email'] = $email;
         header("Location: index.php");
         exit();
     } else {
@@ -45,8 +56,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Login - Your Site</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
+<div class="container">
     <h2>Login</h2>
     <?php if(isset($error)): ?>
         <div><?php echo $error; ?></div>
@@ -58,9 +71,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="password" name="password" required><br>
         <input type="submit" value="Login">
     </form>
-	<div class="form__field">
-    <a href="changePassword.php" class="btn btn--primary">Change Password</a>
 </div>
-
 </body>
 </html>
