@@ -1,75 +1,62 @@
 <?php
-	function canLogin($pEmail, $pPassword){
-		$conn = new mysqli("localhost", "root", "", "Littlesun"); 
-		// in de videos wordt het op een andere manier gedaan
-		$email = $conn->real_escape_string($pEmail);	
-		$query = "SELECT password from users where email = '$email'";
-		$result = $conn->query($query);
-		$user = $result->fetch_assoc();
-		if( password_verify($pPassword, $user['password'])) {
-			return true;
-		}
-		else {
-			return false;
-		}
+session_start();
+require_once 'config.php';
 
-		
-		var_dump($result);
-		exit();
-		
-	}
-	if( !empty($_POST)){
-		$email = $_POST['email'];
-		$password = $_POST['password'];
-		if( canLogin($email, $password)) {
+function canLogin($email, $password) {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
-			session_start();
-			$_SESSION['loggedin'] = true; 	// session is een array op de server
-			header("Location: index.php");
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
-		}
-		else {
-			$error = true;
+    $email = $conn->real_escape_string($email);
+    $query = "SELECT password FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->bind_result($hashedPassword);
+    $stmt->fetch();
 
-		}
-	}
+    if (!$hashedPassword || !password_verify($password, $hashedPassword)) {
+        return false; 
+    }
 
-?><!DOCTYPE html>
+    return true;
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    if (canLogin($email, $password)) {
+
+        $_SESSION['loggedin'] = true;
+        $_SESSION['email'] = $email;
+        header("Location: index.php");
+        exit();
+    } else {
+        $error = "Invalid email or password";
+    }
+}
+?>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>IMDFlix</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>Login - Your Site</title>
 </head>
 <body>
-	<div class="netflixLogin">
-		<div class="form form--login">
-			<form action="" method="post">
-				<h2 form__title>Sign In</h2>
-
-				<?php if(isset($error)): ?>
-				<div class="form__error">
-					<p>
-						Sorry, we can't log you in with that email address and password. Can you try again?
-					</p>
-				</div>
-				<?php endif; ?>
-
-				<div class="form__field">
-					<label for="Email">Email</label>
-					<input type="text" name="email">
-				</div>
-				<div class="form__field">
-					<label for="Password">Password</label>
-					<input type="password" name="password">
-				</div>
-
-				<div class="form__field">
-					<input type="submit" value="Sign in" class="btn btn--primary">	
-					<input type="checkbox" id="rememberMe"><label for="rememberMe" class="label__inline">Remember me</label>
-				</div>
-			</form>
-		</div>
-	</div>
+    <h2>Login</h2>
+    <?php if(isset($error)): ?>
+        <div><?php echo $error; ?></div>
+    <?php endif; ?>
+    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+        <label>Email:</label>
+        <input type="text" name="email" required><br>
+        <label>Password:</label>
+        <input type="password" name="password" required><br>
+        <input type="submit" value="Login">
+    </form>
 </body>
 </html>
