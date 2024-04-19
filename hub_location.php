@@ -2,12 +2,10 @@
 session_start();
 require_once 'config.php';
 
-// Fetch hub locations from the database
 $sql = "SELECT * FROM locations";
 $result = $conn->query($sql);
 
-// Define $user_role before including sidebar.php
-$user_role = ""; // Default value, change this according to your logic
+$user_role = ""; 
 if (isset($_SESSION['email'])) {
     $email = $_SESSION['email'];
     $sql_role = "SELECT typeOfUser FROM users WHERE email = '$email'";
@@ -40,7 +38,7 @@ if (isset($_SESSION['email'])) {
             <th>Actie</th>
         </tr>
         <?php
-        // Check if $result is set and not null
+
         if ($result !== null && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 echo "<tr>";
@@ -59,13 +57,12 @@ if (isset($_SESSION['email'])) {
 </div>
 <div class="sidebar">
     <?php
-    // Include sidebar.php after defining $user_role
+
     include 'sidebar.php';
     ?>
 </div>
 <a class="add-button" href="#">Add location</a>
 
-<!-- This is the modal popup -->
 <div id="myModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
@@ -78,20 +75,18 @@ if (isset($_SESSION['email'])) {
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Open the popup when the link is clicked
+
     $(".add-button").click(function() {
-        // Load the content of "add_manager.php" into the modal
+
         $("#popup-content").load("add_hub_location.php");
-        // Show the modal
+
         $("#myModal").css("display", "block");
     });
 
-    // Close the popup when the close button or outside the modal is clicked
     $(".close, .modal").click(function() {
         $("#myModal").css("display", "none");
     });
 
-    // Prevent the modal from closing when clicking inside the modal content
     $(".modal-content").click(function(event) {
         event.stopPropagation();
     });

@@ -18,7 +18,7 @@ $result = $conn->query($sql);
 if ($result) {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $_SESSION['firstname'] = $row['firstname']; // Store first name in session
+        $_SESSION['firstname'] = $row['firstname'];
         $user_role = $row['typeOfUser'];
     } else {
         $_SESSION['firstname'] = "Unknown";
@@ -46,7 +46,7 @@ $conn->close();
     <div class="sidebar">
         <h2><i class="fas fa-columns"></i></h2>
         <?php 
-    // Perform role check here
+
     if ($user_role === 'admin') {
         echo '<div class="sidebar">';
         echo '<h2><i class="fas fa-columns"></i></h2>';

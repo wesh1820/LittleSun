@@ -1,7 +1,6 @@
 <div class="sidebar">
 <p> Logged in as: <?php echo $_SESSION['firstname']; ?> (<?php echo $user_role; ?>)</p>
     <?php 
-    // Perform role check here
     if ($user_role === 'admin') {
         echo '<h2><i class="fas fa-columns"></i></h2>';
         echo '<a href="manager.php"><i class="fas fa-user"> Manager</i></a>';
