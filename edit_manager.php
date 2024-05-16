@@ -1,10 +1,9 @@
 <?php
-session_start();
 require_once 'config.php';
 
 
 if (!isset($_GET['id'])) {
-    header("Location: index.php");
+    header("Location: manager.php");
     exit();
 }
 
@@ -17,7 +16,7 @@ $result_manager = $stmt_select_manager->get_result();
 
 if ($result_manager->num_rows !== 1) {
 
-    header("Location: index.php");
+    header("Location: manager.php");
     exit();
 }
 
@@ -37,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($stmt_update_manager->execute()) {
 
-        header("Location: index.php");
+        header("Location: manager.php");
         exit();
     } else {
 

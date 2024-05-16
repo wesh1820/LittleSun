@@ -1,9 +1,24 @@
 <?php
-session_start();
-require_once 'config.php';
+require_once './classes/Location.class.php';
+require_once './classes/Task.class.php'; 
+require_once './classes/db.class.php';
+require_once './classes/SessionManager.class.php';
+require_once './classes/User.class.php';
 
-$sql = "SELECT * FROM locations";
-$result = $conn->query($sql);
+
+$email = SessionManager::getSession('email');
+$user = new User($db->getConnection());
+$user_role = $user->getUserRole($email);
+SessionManager::setSession('firstname', $user->getFirstName($email));
+
+$db->closeConnection();
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: login.php");
+    exit();
+}
+
+$locationManager = new Location($conn);
+$locations = $locationManager->getLocations();
 
 $user_role = ""; 
 if (isset($_SESSION['email'])) {
@@ -31,35 +46,30 @@ if (isset($_SESSION['email'])) {
     <h2>Hub Locations</h2>
     <table>
         <tr>
-            <th>Afbeelding</th>
-            <th>Naam</th>
-            <th>Stad</th>
-            <th>Land</th>
-            <th>Actie</th>
+            <th>Name</th>
+            <th>City</th>
+            <th>Country</th>
+            <th>Action</th>
         </tr>
         <?php
 
-        if ($result !== null && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
+        if (!empty($locations)) {
+            foreach ($locations as $location) {
                 echo "<tr>";
-                echo "<td>{$row['image']}</td>";
-                echo "<td>{$row['name']}</td>";
-                echo "<td>{$row['city']}</td>";
-                echo "<td>{$row['country']}</td>";
-                echo "<td><a href='edit_location.php?id={$row['id']}'>Bewerken</a> | <a href='delete_location.php?id={$row['id']}'>Verwijderen</a></td>";
+                echo "<td>{$location['name']}</td>";
+                echo "<td>{$location['city']}</td>";
+                echo "<td>{$location['country']}</td>";
+                echo "<td><a href='edit_location.php?id={$location['id']}'>Edit</a> | <a href='delete_location.php?id={$location['id']}'>Delete</a></td>";
                 echo "</tr>";
             }
         } else {
-            echo "<tr><td colspan='5'>Geen hublocaties gevonden</td></tr>";
+            echo "<tr><td colspan='4'>No hub locations found</td></tr>";
         }
         ?>
     </table>
 </div>
 <div class="sidebar">
-    <?php
-
-    include 'sidebar.php';
-    ?>
+    <?php include 'sidebar.php'; ?>
 </div>
 <a class="add-button" href="#">Add location</a>
 
@@ -69,7 +79,6 @@ if (isset($_SESSION['email'])) {
     <div id="popup-content"></div>
   </div>
 </div>
-
 
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -92,6 +101,4 @@ $(document).ready(function() {
     });
 });
 </script>
-</div>
-</body>
 </html>

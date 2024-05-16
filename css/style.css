@@ -192,3 +192,6 @@ table a:hover {
     margin-top: 300%;
     font-size: x-large;
 }
+.clock-out-button {
+    color: red;
+}

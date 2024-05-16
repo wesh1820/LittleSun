@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $hub_location_id = $_POST['hub_location']; 
-    $typeOfUser = "manager"; 
+    $typeOfUser = "user"; 
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_insert_relation->bind_param("ii", $user_id, $hub_location_id);
         
         if ($stmt_insert_relation->execute()) {
-            header("Location: manager.php");
+            header("Location: user.php");
             exit();
         } else {
 
@@ -55,8 +55,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$sql_managers = "SELECT * FROM users WHERE typeOfUser = 'manager'";
-$result_managers = $conn->query($sql_managers);
+$sql_users = "SELECT * FROM users WHERE typeOfUser = 'user'";
+$result_users = $conn->query($sql_users);
 
 ?>
 <!DOCTYPE html>
@@ -64,13 +64,13 @@ $result_managers = $conn->query($sql_managers);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Hub Manager</title>
+    <title>Add Hub user</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h2>Add Hub Manager</h2>
+        <h2>Add Hub user</h2>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <label for="firstname">First Name:</label>
             <input type="text" id="firstname" name="firstname" required><br>

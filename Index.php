@@ -1,35 +1,14 @@
 <?php
-session_start();
-require_once 'config.php';
+require_once './classes/user.class.php';
+require_once './classes/db.class.php';
+require_once './classes/SessionManager.class.php';
 
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
-    exit();
-}
+$email = SessionManager::getSession('email');
+$user = new User($db->getConnection());
+$user_role = $user->getUserRole($email);
+SessionManager::setSession('firstname', $user->getFirstName($email));
 
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
-
-$email = $_SESSION['email'];
-$sql = "SELECT firstname, typeOfUser FROM users WHERE email = '$email'";
-$result = $conn->query($sql);
-
-if ($result) {
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $_SESSION['firstname'] = $row['firstname'];
-        $user_role = $row['typeOfUser'];
-    } else {
-        $_SESSION['firstname'] = "Unknown";
-        $user_role = "Unknown";
-    }
-} else {
-    $_SESSION['firstname'] = "Unknown";
-    $user_role = "Unknown";
-}
-
-$conn->close();
+$db->closeConnection();
 ?>
 
 <!DOCTYPE html>
@@ -45,28 +24,26 @@ $conn->close();
 <div class="container">
     <div class="sidebar">
         <h2><i class="fas fa-columns"></i></h2>
-        <?php 
-
-    if ($user_role === 'admin') {
-        echo '<div class="sidebar">';
-        echo '<h2><i class="fas fa-columns"></i></h2>';
-        echo '<a href="manager.php"><i class="fas fa-user"></i></a>';
-        echo '<a href="hub_location.php"><i class="fas fa-map-marker-alt"></i></a>';
-        echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i></a>';
-        echo '</div>';
-    } elseif ($user_role === 'manager') {
-        echo '<div class="sidebar">';
-        echo '<h2><i class="fas fa-columns"></i></h2>';
-        echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i></a>';
-        echo '</div>';
-    }
-?>
+        <?php
+        if ($user_role === 'admin') {
+            echo '<a href="manager.php"><i class="fas fa-user">Managers</i></a>';
+            echo '<a href="hub_location.php"><i class="fas fa-map-marker-alt">Locations</i></a>';
+            echo '<a href="tasks.php"><i class="fas fa-tasks">Tasks</i></a>';
+        } elseif ($user_role === 'manager') {
+            echo '<a href="user.php"><i class="fa fa-user">Users</i></a>';
+            echo '<a href="user_tasks.php"><i class="fa fa-tasks"> tasks</i></a>';
+            echo '<a href="calender.php"><i class="fa fa-calendar"> calender</i></a>';
+        } elseif ($user_role === 'user') {
+            echo '<a href="clockin.php"><i class="fas fa-tasks">Clockin</i></a>';
+            echo '<a href="taskasuser.php"><i class="fas fa-tasks">Tasks</i></a>';
+        }
+        ?>
+        <a href="logout.php"><i class="fas fa-sign-out-alt">Logout</i></a>
     </div>
     <div class="content">
-        <h2> Logged in as: <?php echo $_SESSION['firstname']; ?> (<?php echo $user_role; ?>)</h2>
+        <h2> Logged in as: <?php echo SessionManager::getSession('firstname'); ?> (<?php echo $user_role; ?>)</h2>
     </div>
 </div>
-
-
 </body>
 </html>
+?>
