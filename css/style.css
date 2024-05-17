@@ -1,33 +1,48 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background-image: url(https://image.cnbcfm.com/api/v1/image/102608685-134950648.jpg?v=1532564317);
-    background-repeat: no-repeat;
-    background-size: cover;
+    padding: 0 0 24px 0;
+    background-color: #fffffe;
+}
+.logo {
+    margin: 0 auto;
+}
+
+.logo img {
+    width: 300px;
+    height: 300px;
 }
 
 .container {
     max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
+    margin: -80px auto;
+    padding: 24px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
     text-align: center;
-    margin-bottom: 20px;
 }
 
-form {
-    margin-bottom: 20px;
+.container h2 {
+    margin-top: -50px;
+    margin-bottom: 40px;
+    text-align: left;
 }
 
-form label {
+.container form label{
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
+    text-align: left;
+
+}
+
+.form__field {
+    text-align: left;
+    padding: 8px;
+}
+
+#typeOfUser {
+    padding: 4px;
+    border-radius: 6px;
+    margin-left: 6px;
 }
 
 form input[type="text"],
@@ -35,30 +50,35 @@ form input[type="password"],
 form input[type="email"],
 form input[type="hub_location"],
 form input[type="file"] {
-    width: calc(100% - 12px);
-    padding: 8px;
+    width: calc(100% - 24px);
+    padding: 12px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
 }
 
 form input[type="submit"] {
     width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
+    padding: 12px;
+    background-color: #111311;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
 form input[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: #FFDD00;
+    color: rgb(22, 22, 22);
 }
+
 
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 180px;
 }
 
 table th,
@@ -69,7 +89,9 @@ table td {
 }
 
 table th {
-    background-color: #f2f2f2;
+    background-color: #414141;
+    color: #ccc;
+    text-align: center;
 }
 
 table tr:nth-child(even) {
@@ -93,48 +115,78 @@ table a:hover {
     position: fixed;
     top: 20px;
     right: 20px;
-    background-color: #258514;
-    color: white;
+    background-color: #e9ca01;
+    color: rgb(54, 52, 52);
     padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
 }
 
 .add-button:hover {
-    background-color: #45a049;
+    background-color: #111110;
+    color: #ccc;
 }
+
+
+.hamburger-icon {
+    color: rgb(202, 198, 198);
+    position: fixed;
+    top: 20px; 
+    left: 20px; 
+    z-index: 999; 
+    cursor: pointer;
+    display: block;
+    width: 50px;
+
+}
+
+.hamburger-icon .line {
+    width: 50px; 
+    height: 3px; 
+    background-color: #fff; 
+    margin: 6px 0; 
+    transition: 0.4s; 
+}
+
 .sidebar {
-    position: fixed; /* Keep the sidebar fixed on the screen */
-    left: 0; /* Align the sidebar to the left side */
-    top: 0; /* Optionally, you can adjust the top position */
-    bottom: 0; /* Optionally, you can adjust the bottom position */
-    width: 150px; /* Adjust the width as needed */
-    background-color: #ff9335;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-    text-decoration: none;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 20;
+    width: 250px; 
+    height: 100%; 
+    background-color: #000000;
+    z-index: 998; 
+    overflow-x: hidden;
+    padding-top: 60px; 
+    
+}
+
+.sidebar-open {
+    display: block;
 }
 
 .sidebar a {
     display: block;
-    margin-bottom: 20px;
+    gap: 20px;
+    margin: 25px;
     color: #fff;
     text-decoration: none;
+
 }
 
 .sidebar i {
     font-size: 24px;
     margin-bottom: 5px;
+    padding-left: 20px;
 }
-
 
 .content {
     flex: 1;
     padding: 20px;
-    position: relative; /* Position relative for absolute positioning */
+    position: relative; 
 }
 
 
@@ -149,30 +201,27 @@ table a:hover {
     color: #007bff;
     text-decoration: none;
 }
-/* Style for the modal popup */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; /* Enable scrolling if needed */
-    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+    overflow: auto; 
+    background-color: rgba(0, 0, 0, 0.5); 
   }
   
-  /* Modal Content */
   .modal-content {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 15% auto; 
     padding: 10px;
     border: 1px solid #888;
-    width: 30%; /* Could be more or less, depending on screen size */
+    width: 30%; 
     margin-top: 5%;
   }
   
-  /* Close Button */
   .close {
     color: #aaa;
     float: right;
@@ -195,3 +244,67 @@ table a:hover {
 .clock-out-button {
     color: red;
 }
+
+
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+    .hamburger-icon {
+        display: block;
+    }
+    .sidebar {
+        left: -250px;
+    }
+    .sidebar-open {
+        left: 0;
+    }
+}
+
+@media only screen and (min-width: 1025px) {
+    .sidebar {
+        left:0px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* @media (min-width: 768px) {
+    body {
+        background-color: red;
+    }
+    .hamburger-icon {
+        display: block; /* Show hamburger icon on mobile */
+    /* }
+
+    .sidebar {
+        left: -290px; /* Hide sidebar on mobile by default */
+    /* }
+
+    .sidebar-open {
+        left: 0; /* Show sidebar when open on mobile */
+    /* }
+}  */
+
+/* @media (max-width: 1024px) {
+    body {
+        background-color: red;
+    }
+    .hamburger-icon {
+        display: block; 
+    }
+    /* .sidebar {
+        left: -250px; 
+    }
+    .sidebar.sidebar-open {
+        left: 0;
+    }
+} */ 
