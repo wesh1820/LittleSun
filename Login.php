@@ -48,28 +48,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Invalid email or password";
     }
 }
-?>
-
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login - Your Site</title>
-	<link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
 <div class="container">
-    <h2>Login</h2>
+<div class="logo">
+    <img src="../LittleSun/css/images/Logo.svg" alt="Logo">
+</div>
+
+    <h2>Welcome back! Let's get started.</h2>
     <?php if(isset($error)): ?>
         <div><?php echo $error; ?></div>
     <?php endif; ?>
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-        <label>Email:</label>
-        <input type="text" name="email" required><br>
-        <label>Password:</label>
-        <input type="password" name="password" required><br>
+        <label>E-mail address</label>
+        <input type="text" name="email" placeholder="Alexander.martinez@example.com" required><br>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="*************" required><br>
         <input type="submit" value="Login">
     </form>
 </div>
 </body>
 </html>
+

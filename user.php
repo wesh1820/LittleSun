@@ -28,13 +28,20 @@ if (isset($_SESSION['email'])) {
     <title>Add Hub user</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="container">    
+<div class="hamburger-icon">
+    <i class="fas fa-bars"></i>
+</div>
+<div class="sidebar">
+    <div class="logo-sidebar">
+        <img src="../LittleSun/css/images/Logo.svg" alt="Logo">
+    </div>
+    <?php include 'sidebar.php'; ?>
+</div>
+<div class="container">   
     <?php
     if ($result_users->num_rows > 0) {
-
         echo "<h2>Hub users</h2>";
         echo "<table>";
         echo "<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Actions</th></tr>";
@@ -51,15 +58,8 @@ if (isset($_SESSION['email'])) {
         }
         echo "</table>";
     } else {
-
         echo "<p>No hub users found.</p>";
     }
-    ?>
-</div>
-<div class="sidebar">
-    <?php
-
-    include 'sidebar.php';
     ?>
 </div>
 
@@ -74,26 +74,24 @@ if (isset($_SESSION['email'])) {
   </div>
 </div>
 
-</body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
-   
+    $(".hamburger-icon").click(function() {
+        $(".sidebar").toggleClass("sidebar-open");
+    });
     $(".add-button").click(function() {
-       
         $("#popup-content").load("add_user.php");
-        
         $("#myModal").css("display", "block");
     });
-
     $(".close, .modal").click(function() {
         $("#myModal").css("display", "none");
     });
-   
     $(".modal-content").click(function(event) {
         event.stopPropagation();
     });
 });
 </script>
 
+</body>
 </html>
