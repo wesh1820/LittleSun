@@ -4,9 +4,13 @@ require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 
+// Start session
+
+
 $email = Session::getSession('email');
 
 // Instantiate DB class
+
 $conn = $db->getConnection();
 
 $user = new User($conn);
@@ -21,7 +25,9 @@ $sql = "SELECT UserTasks.UserTaskID, UserTasks.UserID, UserTasks.TaskID, users.f
         INNER JOIN users ON UserTasks.UserID = users.id 
         INNER JOIN tasks ON UserTasks.TaskID = tasks.TaskID 
         INNER JOIN time_slots ON UserTasks.UserID = time_slots.UserID AND UserTasks.TaskID = time_slots.TaskID
-        WHERE time_slots.Sick = 0"; // Only select time slots that are not marked as sick
+        WHERE time_slots.Sick = 0
+        AND users.email = '$email'"; // Filter by the user's email
+
 $result = $conn->query($sql);
 
 // Initialize an associative array to store tasks and time slots by date
@@ -95,6 +101,7 @@ if ($result_days_off) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,7 +169,7 @@ if ($result_days_off) {
 }
 
 .task {
-    background-color: #726278;
+    background-color: #f2f2f2;
     padding: 5px;
     margin-bottom: 5px;
 }

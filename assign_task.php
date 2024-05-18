@@ -20,10 +20,37 @@ function checkUserTask($conn, $userID, $taskID) {
     return ($result->num_rows > 0);
 }
 
-// Functie om een taak toe te voegen aan de time_slots tabel
+// Functie om te controleren of een gebruiker time-off heeft op een specifieke datum en tijdstip
+function checkUserTimeOff($conn, $userID, $date, $startTime, $endTime) {
+    $sql = "SELECT * FROM timeoff 
+            WHERE UserID = $userID 
+            AND Start_date = '$date'
+            AND (
+                (Start_time <= '$endTime' AND End_time >= '$startTime')
+                OR (Start_time <= '$startTime' AND End_time >= '$startTime')
+                OR (Start_time >= '$startTime' AND End_time <= '$endTime')
+            )
+            AND Status = 1"; // Include status condition
+    echo "SQL Query: " . $sql . "<br>"; // Debugging statement
+    $result = $conn->query($sql);
+    echo "Number of Rows: " . $result->num_rows . "<br>"; // Debugging statement
+    return ($result->num_rows > 0);
+}
+
+// Functie om een taak toe te voegen aan de time_slots tabel en de Sick-veld bij te werken
 function addTaskToTimeSlot($conn, $userID, $taskID, $startSlot, $endSlot, $date) {
+    $startTime = $startSlot . ":00"; // Voeg seconden toe aan het starttijdslot
+    $endTime = $endSlot . ":00"; // Voeg seconden toe aan het eindtijdslot
+
+    // Controleer of de gebruiker time-off heeft op dit tijdstip
+    if (checkUserTimeOff($conn, $userID, $date, $startTime, $endTime)) {
+        echo "User has time-off at this time. Task cannot be assigned."; // Debugging statement
+        return; // Stop de functie als er time-off is
+    }
+
+    // Voeg de taak toe aan het tijdvak
     if (checkUserTask($conn, $userID, $taskID)) {
-        $sql = "INSERT INTO time_slots (UserID, TaskID, StartSlot, EndSlot, Date) VALUES ('$userID', '$taskID', '$startSlot', '$endSlot', '$date')";
+        $sql = "INSERT INTO time_slots (UserID, TaskID, StartSlot, EndSlot, Date, Sick) VALUES ('$userID', '$taskID', '$startSlot', '$endSlot', '$date', 0)";
         if ($conn->query($sql) === TRUE) {
             echo "Task successfully assigned to user.";
         } else {

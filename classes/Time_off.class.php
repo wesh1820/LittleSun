@@ -7,58 +7,50 @@ class Timeoff {
     public function __construct($conn) {
         $this->conn = $conn;
     }
-    public function requestTimeOff($user_id, $date_off) {
-        $sql = "INSERT INTO time_off_requests (user_id, date_off) VALUES (?, ?)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("is", $user_id, $date_off);
-        $success = $stmt->execute();
-        $stmt->close();
-        return $success;
-    }
-    public function getTimeOffRequests() {
-        $sql = "SELECT tor.*, u.firstname, u.lastname 
-                FROM time_off_requests tor
-                INNER JOIN users u ON tor.user_id = u.id";
-        $result = $this->conn->query($sql);
+
     
-        if ($result) {
-            // Check if there are any time off requests
-            if ($result->num_rows > 0) {
-                $time_off_requests = array();
-                // Fetch all time off requests
-                while ($row = $result->fetch_assoc()) {
-                    $time_off_requests[] = $row;
-                }
-                return $time_off_requests;
-            } else {
-                return array(); // Return an empty array if no time off requests found
-            }
-        } else {
-            // Handle query execution error
-            echo "Error retrieving time off requests: " . $this->conn->error;
-            return false;
+        // Method to retrieve all time-off requests except those with status 1, including user first and last names
+        public function getTimeOffRequests() {
+            $sql = "SELECT timeoff.*, users.firstname, users.lastname 
+                    FROM timeoff 
+                    JOIN users ON timeoff.UserID = users.id 
+                    WHERE timeoff.Status != 1";
+            $result = $this->conn->query($sql);
+            return $result->fetch_all(MYSQLI_ASSOC);
         }
+    
+        // Method to update the status of a time-off request
+        public function updateStatus($request_id, $status) {
+            $sql = "UPDATE timeoff SET Status = ? WHERE ID = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("ii", $status, $request_id);
+            return $stmt->execute();
+        }
+    
+
+// Method to accept a time off request
+public function acceptTimeOffRequest($request_id) {
+    $sql = "UPDATE timeoff SET Status = 'Accepted' WHERE ID = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("i", $request_id);
+    if ($stmt->execute()) {
+        return true; // Successfully accepted
+    } else {
+        return false; // Error accepting
     }
-    
-    
-    public function acceptTimeOffRequest($request_id) {
-        $sql = "UPDATE time_off_requests SET status = 1 WHERE id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $request_id);
-        $success = $stmt->execute();
-        $stmt->close();
-        return $success;
+}
+
+// Method to deny a time off request
+public function denyTimeOffRequest($request_id) {
+    $sql = "UPDATE timeoff SET Status = 'Denied' WHERE ID = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("i", $request_id);
+    if ($stmt->execute()) {
+        return true; // Successfully denied
+    } else {
+        return false; // Error denying
     }
-    
-    public function denyTimeOffRequest($request_id) {
-        $sql = "UPDATE time_off_requests SET status = 0 WHERE id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $request_id);
-        $success = $stmt->execute();
-        $stmt->close();
-        return $success;
-    }
-    
-    
+}
+
 }
 ?>

@@ -1,47 +1,71 @@
 <?php
-
-require_once 'config.php';
-require_once './classes/Location.class.php';
+require_once 'config.php'; // Include database configuration
+require_once './classes/user.class.php';
 require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
-
+// Validate input and process the form
+// Validate input and process the form
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST["user_id"]) && isset($_POST["reason"]) && isset($_POST["date_off"]) && isset($_POST["start_time_slot"]) && isset($_POST["end_time_slot"])) {
-        $servername = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "littlesun";
+    // Check if all required fields are filled
+    if (isset($_POST["user_id"], $_POST["reason"], $_POST["time_off_type"])) {
+        // Retrieve and sanitize user ID from form data
+        $user_id = intval($_POST["user_id"]); // Convert to integer
+        echo "User ID: " . $user_id; // Debugging statement
 
-        $conn = new mysqli($servername, $username, $password, $dbname);
-
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
+        if ($user_id <= 0) {
+            echo "Invalid user ID: " . $user_id;
+            exit; // Exit script
         }
+        
+        // Additional checks based on time off type
+        // Remaining code...
 
-        $user_id = $_POST["user_id"];
-        $reason = $_POST["reason"];
-        $date_off = $_POST["date_off"];
-        $start_time = $_POST["start_time_slot"];
-        $end_time = $_POST["end_time_slot"];
-        $status = 0; // 'Pending' status represented as 0
+        
+        // Additional checks based on time off type
+        if ($_POST["time_off_type"] === "single_day" && isset($_POST["start_date"], $_POST["start_time_slot"], $_POST["end_time_slot"])) {
+            // Single day off form fields
+            $reason = $_POST["reason"];
+            $start_date = $_POST["start_date"];
+            $start_time = $_POST["start_time_slot"];
+            $end_time = $_POST["end_time_slot"];
+            $status = 0; // 'Pending' status
 
-        $sql = "INSERT INTO time_off_requests (user_id, reason, date_off, start_time, end_time, status) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issssi", $user_id, $reason, $date_off, $start_time, $end_time, $status);
+            // Insert single day off data into the database
+            $sql = "INSERT INTO timeoff (UserID, Timeoff_reason, Start_date, Start_time, End_time, Status) 
+                    VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("issssi", $user_id, $reason, $start_date, $start_time, $end_time, $status);
+            if ($stmt->execute()) {
+                echo "Single day time off request submitted successfully.";
+            } else {
+                echo "Error: " . $stmt->error;
+            }
+            $stmt->close();
+        } elseif ($_POST["time_off_type"] === "multiple_days" && isset($_POST["start_date"], $_POST["end_date"])) {
+            // Multiple days off form fields
+            $reason = $_POST["reason"];
+            $start_date = $_POST["start_date"];
+            $end_date = $_POST["end_date"];
+            $status = 0; // 'Pending' status
 
-        if ($stmt->execute() === TRUE) {
-            echo "Verlofaanvraag succesvol ingediend.";
+            // Insert multiple days off data into the database
+            $sql = "INSERT INTO timeoff (UserID, Timeoff_reason, Start_date, End_date, Status) 
+                    VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("isssi", $user_id, $reason, $start_date, $end_date, $status);
+            if ($stmt->execute()) {
+                echo "Multiple days time off request submitted successfully.";
+            } else {
+                echo "Error: " . $stmt->error;
+            }
+            $stmt->close();
         } else {
-            echo "Error: " . $stmt->error;
+            echo "Not all required fields are filled for the selected time off type.";
         }
-
-        $stmt->close();
-        $conn->close();
     } else {
-        echo "Niet alle vereiste velden zijn ingevuld.";
+        echo "Not all required fields are filled.";
     }
 } else {
-    echo "Het formulier is niet verzonden.";
+    echo "The form was not submitted.";
 }
 ?>

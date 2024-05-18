@@ -1,31 +1,3 @@
-<?php
-require_once './classes/time_off.class.php'; 
-
-// Instantiate Timeoff class with database connection
-$user = new Timeoff($conn);
-
-// Handle accept/deny actions
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["action"]) && isset($_POST["request_id"])) {
-    $action = $_POST["action"];
-    $request_id = $_POST["request_id"];
-    echo "Processing request with ID: $request_id"; // Debugging
-    if ($action === "accept") {
-        $success = $user->acceptTimeOffRequest($request_id);
-        $message = $success ? "Time off request accepted successfully!" : "Error accepting time off request.";
-    } elseif ($action === "deny") {
-        $success = $user->denyTimeOffRequest($request_id);
-        $message = $success ? "Time off request denied successfully!" : "Error denying time off request.";
-    }
-
-    // Redirect to the same page after processing
-    header("Location: {$_SERVER['PHP_SELF']}");
-    exit();
-}
-
-// Retrieve all time off requests
-$time_off_requests = $user->getTimeOffRequests();
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,29 +25,70 @@ $time_off_requests = $user->getTimeOffRequests();
     </style>
 </head>
 <body>
-    <?php if (!empty($time_off_requests)): ?>
-        <div class="sidebar">
-            <?php include 'sidebar.php'; ?>
-        </div>
-        <div class="container">
-            <h1>Time Off Requests</h1>
+    <?php 
+    // Include the Timeoff class and establish database connection
+    require_once './classes/time_off.class.php'; 
+
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "littlesun";
+    
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    $user = new Timeoff($conn);
+
+    // Handle form submissions
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        if (isset($_POST['action'])) {
+            $request_id = $_POST['request_id'];
+            if ($_POST['action'] == 'accept') {
+                $user->updateStatus($request_id, 1);
+            } elseif ($_POST['action'] == 'deny') {
+                $user->updateStatus($request_id, 0);
+            }
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        }
+    }
+
+    // Retrieve all time off requests excluding those with status 1
+    $time_off_requests = $user->getTimeOffRequests();
+    ?>
+
+    <div class="sidebar">
+        <?php include 'sidebar.php'; ?>
+    </div>
+    <div class="container">
+        <h1>Time Off Requests</h1>
+        <?php if (!empty($time_off_requests)): ?>
             <table>
                 <tr>
-                    <th>Firstname</th>
-                    <th>Lastname</th>
-                    <th>Date Off</th>
+                    <th>User</th>
+                    <th>Timeoff Reason</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
                 <?php foreach ($time_off_requests as $request): ?>
                     <tr>
-                        <td><?= $request['firstname'] ?></td>
-                        <td><?= $request['lastname'] ?></td>
-                        <td><?= $request['date_off'] ?></td>
-                        <td><?= $request['status'] ?></td>
+                        <td><?= htmlspecialchars($request['firstname'] . ' ' . htmlspecialchars($request['lastname'])) ?></td>
+                        <td><?= htmlspecialchars($request['Timeoff_reason']) ?></td>
+                        <td><?= htmlspecialchars($request['Start_date']) ?></td>
+                        <td><?= htmlspecialchars($request['End_date']) ?></td>
+                        <td><?= htmlspecialchars($request['Start_time']) ?></td>
+                        <td><?= htmlspecialchars($request['End_time']) ?></td>
+                        <td><?= htmlspecialchars($request['Status']) ?></td>
                         <td>
-                            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST">
-                                <input type="hidden" name="request_id" value="<?= $request['id'] ?>">
+                            <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
+                                <input type="hidden" name="request_id" value="<?= htmlspecialchars($request['ID']) ?>">
                                 <button type="submit" name="action" value="accept">Accept</button>
                                 <button type="submit" name="action" value="deny">Deny</button>
                             </form>
@@ -83,9 +96,9 @@ $time_off_requests = $user->getTimeOffRequests();
                     </tr>
                 <?php endforeach; ?>
             </table>
-        </div>
-    <?php else: ?>
-        <p>No time off requests found.</p>
-    <?php endif; ?>
+        <?php else: ?>
+            <p>No time off requests found.</p>
+        <?php endif; ?>
+    </div>
 </body>
 </html>

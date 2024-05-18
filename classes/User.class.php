@@ -81,7 +81,6 @@ public function getLocationId($userId) {
         return null; // Gebruiker niet gevonden of locatie niet ingesteld
     }
 }
-
     
     public function getUsersByLocation($locationId) {
         // Prepare and execute a query to get users based on their location

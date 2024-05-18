@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-
+include 'sidebar.php';
 // Start de sessie
 session_start();
 
@@ -128,7 +128,7 @@ $conn->close();
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
-            
+
             <input type="hidden" id="hub_location" name="hub_location" value="<?php echo $loggedInLocation; ?>">
 
             <input type="submit" value="Submit">

@@ -45,6 +45,7 @@
     echo '<h2><i class="fas fa-columns"></i></h2>';
     echo '<a href="clockin.php"><i class="fas fa-tasks">Clockin</i></a>';
     echo '<a href="taskasuser.php"><i class="fas fa-tasks">Tasks</i></a>';
+    echo '<a href="user_calender.php"><i class="fas fa-tasks">Calender</i></a>';
     echo '<a href="ask_time_off.php"><i class="fas fa-tasks">Time Off</i></a>';
     echo '<a href="logout.php"><i class="fas fa-sign-out-alt">Logout</i></a>';
     echo '</div>';

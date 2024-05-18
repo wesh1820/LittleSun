@@ -1,12 +1,17 @@
 <?php
-require_once 'config.php'; // Include the config file which starts the session
+// Start the session (if not already started)
+session_start();
 
-// Assuming user ID is stored in session
-
-$user_id = $_SESSION['user_id']; // Ensure user ID is stored in session
-
+// Check if the user is logged in and if their user ID is stored in the session
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id']; // Retrieve the user ID from the session
+} else {
+    // Handle the case where the user is not logged in or the user ID is not set in the session
+    // For example, redirect the user to the login page
+    header("Location: login.php");
+    exit(); // Stop further execution
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,36 +38,72 @@ $user_id = $_SESSION['user_id']; // Ensure user ID is stored in session
                 <option value="Vacation">Vacation</option>
             </select>
             <br><br>
-            <label for="date_off">Date Off:</label>
-            <input type="date" id="date_off" name="date_off" required>
-            <br><br>
-            <label for="start_time_slot">Start Time Slot:</label>
-            <select id="start_time_slot" name="start_time_slot" required>
-                <option value="" disabled selected>Select start time slot</option>
-                <?php
-                    $start_time = strtotime('08:00');
-                    $end_time = strtotime('20:00');
-                    while ($start_time <= $end_time) {
-                        echo '<option value="' . date('H:i', $start_time) . '">' . date('h:i A', $start_time) . '</option>';
-                        $start_time += (30 * 60);
-                    }
-                ?>
+            <label for="time_off_type">Select Time Off Type:</label>
+            <select id="time_off_type" name="time_off_type" required onchange="toggleTimeSlots()">
+                <option value="single_day">Single Day</option>
+                <option value="multiple_days">Multiple Days</option>
             </select>
             <br><br>
-            <label for="end_time_slot">End Time Slot:</label>
-            <select id="end_time_slot" name="end_time_slot" required>
-                <option value="" disabled selected>Select end time slot</option>
-                <?php
-                    $start_time = strtotime('08:00');
-                    while ($start_time <= $end_time) {
-                        echo '<option value="' . date('H:i', $start_time) . '">' . date('h:i A', $start_time) . '</option>';
-                        $start_time += (30 * 60);
-                    }
-                ?>
-            </select>
+            <div id="single_day" style="display:block;">
+                <label for="start_date">Date Off:</label>
+                <input type="date" id="start_date" name="start_date" required>
+                <br><br>
+                <label for="start_time_slot">Start Time Slot:</label>
+                <select id="start_time_slot" name="start_time_slot" required>
+                    <option value="" disabled selected>Select start time slot</option>
+                    <?php
+                        $start_time = strtotime('08:00');
+                        $end_time = strtotime('20:00');
+                        while ($start_time <= $end_time) {
+                            echo '<option value="' . date('H:i', $start_time) . '">' . date('h:i A', $start_time) . '</option>';
+                            $start_time += (30 * 60);
+                        }
+                    ?>
+                </select>
+                <br><br>
+                <label for="end_time_slot">End Time Slot:</label>
+                <select id="end_time_slot" name="end_time_slot" required>
+                    <option value="" disabled selected>Select end time slot</option>
+                    <?php
+                        // Display the same time slots as start time for single day off
+                        $start_time = strtotime('08:00');
+                        while ($start_time <= $end_time) {
+                            echo '<option value="' . date('H:i', $start_time) . '">' . date('h:i A', $start_time) . '</option>';
+                            $start_time += (30 * 60);
+                        }
+                    ?>
+                </select>
+            </div>
+            <div id="multiple_days" style="display:none;">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" required>
+                <br><br>
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
             <br><br>
             <input type="submit" value="Submit">
         </form>
     </div>
+
+    <script>
+function toggleTimeSlots() {
+    var timeOffType = document.getElementById("time_off_type").value;
+    var singleDayDiv = document.getElementById("single_day");
+    var multipleDaysDiv = document.getElementById("multiple_days");
+
+    if (timeOffType === "single_day") {
+        singleDayDiv.style.display = "block";
+        multipleDaysDiv.style.display = "none";
+    } else if (timeOffType === "multiple_days") {
+        singleDayDiv.style.display = "none";
+        multipleDaysDiv.style.display = "block";
+    } else {
+        singleDayDiv.style.display = "none"; // Hide single day div
+        multipleDaysDiv.style.display = "none"; // Hide multiple days div
+    }
+}
+
+    </script>
 </body>
 </html>
