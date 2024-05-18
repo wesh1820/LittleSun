@@ -1,7 +1,7 @@
 <?php
 require_once './classes/Location.class.php';
 require_once './classes/db.class.php';
-require_once './classes/SessionManager.class.php';
+require_once './classes/Session.class.php';
 
 // Instantiate the Location class
 $locationEditor = new Location($db->getConnection());

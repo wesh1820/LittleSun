@@ -1,5 +1,5 @@
 <?php
-class SessionManager {
+class Session {
     public static function startSession() {
         session_start();
     }

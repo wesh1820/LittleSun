@@ -2,14 +2,14 @@
 require_once './classes/Clock.class.php'; // Include the ClockManager class
 require_once './classes/Task.class.php'; 
 require_once './classes/db.class.php'; // Include the Database class
-require_once './classes/SessionManager.class.php';
+require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 include 'sidebar.php';
 
-$email = SessionManager::getSession('email');
+$email = Session::getSession('email');
 $user = new User($db->getConnection());
 $user_role = $user->getUserRole($email);
-SessionManager::setSession('firstname', $user->getFirstName($email));
+Session::setSession('firstname', $user->getFirstName($email));
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -29,6 +29,9 @@ if(isset($_POST['clock_out'])) {
 }
 
 $result = $clockManager->getUserRecords($user_id);
+
+// Check if user is currently clocked in
+$clocked_in = $clockManager->isClockedIn($user_id);
 
 // Close the database connection
 $db->closeConnection();
@@ -54,12 +57,14 @@ $db->closeConnection();
 </head>
 <body>
     <div class="container">
-        <h2>Clock In/Out System</h2>
+        <h2>Clock In/Out</h2>
         
         <?php if(isset($message)) echo "<p>$message</p>"; ?>
         
         <form method="post" action="">
+            <?php if(!$clocked_in) { ?>
             <input type="submit" name="clock_in" value="Clock In">
+            <?php } ?>
             <input type="submit" name="clock_out" value="Clock Out" style="background-color: red;">
         </form>
 

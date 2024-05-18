@@ -1,12 +1,12 @@
 <?php
 require_once './classes/user.class.php';
 require_once './classes/db.class.php';
-require_once './classes/SessionManager.class.php';
+require_once './classes/Session.class.php';
 
-$email = SessionManager::getSession('email');
+$email = Session::getSession('email');
 $user = new User($db->getConnection());
 $user_role = $user->getUserRole($email);
-SessionManager::setSession('firstname', $user->getFirstName($email));
+Session::setSession('firstname', $user->getFirstName($email));
 
 $db->closeConnection();
 ?>
@@ -28,7 +28,7 @@ $db->closeConnection();
         if ($user_role === 'admin') {
             echo '<a href="manager.php"><i class="fas fa-user">Managers</i></a>';
             echo '<a href="hub_location.php"><i class="fas fa-map-marker-alt">Locations</i></a>';
-            echo '<a href="tasks.php"><i class="fas fa-tasks">Tasks</i></a>';
+            echo '<a href="task.php"><i class="fas fa-tasks">Tasks</i></a>';
         } elseif ($user_role === 'manager') {
             echo '<a href="user.php"><i class="fa fa-user">Users</i></a>';
             echo '<a href="user_tasks.php"><i class="fa fa-tasks"> tasks</i></a>';
@@ -41,7 +41,7 @@ $db->closeConnection();
         <a href="logout.php"><i class="fas fa-sign-out-alt">Logout</i></a>
     </div>
     <div class="content">
-        <h2> Logged in as: <?php echo SessionManager::getSession('firstname'); ?> (<?php echo $user_role; ?>)</h2>
+        <h2> Logged in as: <?php echo Session::getSession('firstname'); ?> (<?php echo $user_role; ?>)</h2>
     </div>
 </div>
 </body>

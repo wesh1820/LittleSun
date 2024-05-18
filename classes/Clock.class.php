@@ -1,10 +1,15 @@
 <?php
+
+require_once './classes/Task.class.php'; 
+require_once './classes/db.class.php';
+require_once './classes/Session.class.php';
 class Clock {
     private $conn;
 
     public function __construct($conn) {
         $this->conn = $conn;
     }
+    
 
     public function clockIn($userId) {
         $clockInTime = date("Y-m-d H:i:s");
@@ -35,5 +40,16 @@ class Clock {
         $stmt->close();
         return $result;
     }
+
+    public function isClockedIn($userId) {
+        $sql = "SELECT COUNT(*) as count FROM clock_records WHERE user_id = ? AND clock_out_time IS NULL";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $result['count'] > 0;
+    }
+    
 }
 ?>

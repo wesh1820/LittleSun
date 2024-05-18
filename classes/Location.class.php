@@ -21,7 +21,7 @@ class Location {
     }
 
     public function updateLocation($location_id, $name, $city, $country) {
-        $status = 1; // Assuming new locations are active by default
+        $status = 1;
 
         $sql = "UPDATE locations SET name = ?, city = ?, country = ?, status = ? WHERE id = ?";
         $stmt = $this->conn->prepare($sql);
@@ -72,16 +72,16 @@ class Location {
         $this->conn->close();
     }
     public function deleteLocation($location_id) {
-        // Prepare and execute the SQL query to delete the location
+        
         $sql = "DELETE FROM locations WHERE id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $location_id);
         
         if ($stmt->execute()) {
-            // Return true if deletion is successful
+           
             return true;
         } else {
-            // Return false if an error occurs during deletion
+            
             return false;
         }
     }

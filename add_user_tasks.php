@@ -1,11 +1,9 @@
 <?php
 require_once 'config.php';
 
-// Query to fetch users
 $sql_users = "SELECT id, firstname, lastname FROM users WHERE typeOfUser = 'USER'";
 $result_users = $conn->query($sql_users);
 
-// Query to fetch tasks
 $sql_tasks = "SELECT TaskID, TaskName FROM tasks";
 $result_tasks = $conn->query($sql_tasks);
 
@@ -42,15 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
 
-    // SQL query to insert the assignment into the database
     $sql_insert_assignment = "INSERT INTO UserTasks (UserID, TaskID, Date, StartTime, EndTime) VALUES (?, ?, ?, ?, ?)";
     $stmt_insert_assignment = $conn->prepare($sql_insert_assignment);
     $stmt_insert_assignment->bind_param("iisss", $selected_user_id, $selected_task_id, $date, $start_time, $end_time);
 
     if ($stmt_insert_assignment->execute()) {
-        // Redirect back to user_tasks.php after successful assignment
         header("Location: user_tasks.php");
-        exit(); // Ensure that no further output is sent after redirection
     } else {
         echo "Error assigning user to task: " . $conn->error;
     }

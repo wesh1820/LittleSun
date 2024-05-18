@@ -1,7 +1,10 @@
 <?php
 require_once './classes/Location.class.php';
 require_once './classes/db.class.php';
-require_once './classes/SessionManager.class.php';
+require_once './classes/Session.class.php';
+
+// Establish a database connection
+$location = new Location($conn);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
@@ -18,6 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">

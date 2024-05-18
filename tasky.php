@@ -2,16 +2,25 @@
 require_once './classes/User.class.php';
 require_once './classes/db.class.php';
 
+// Maak een instantie van de db-klasse
+
+
+// Create a new database connection
+$connection = $db->getConnection();
+
 // Create a new user instance
-$user = new User($db->getConnection());
+$user = new User($connection);
 
-// Get the ID of the logged-in user
-$loggedInUserId = $_SESSION['user_id']; // Adjust this based on how you identify the user
+// Vervolg van je code...
 
-// Get the location ID of the logged-in user
+
+// Get the ID van de ingelogde gebruiker
+$loggedInUserId = $_SESSION['user_id']; // Pas dit aan op basis van hoe je de gebruiker identificeert
+
+// Haal de locatie ID van de ingelogde gebruiker op
 $loggedInUserLocationId = $user->getLocationId($loggedInUserId);
 
-// Get users only from the location of the logged-in user
+// Haal alleen de gebruikers op van de locatie van de ingelogde gebruiker
 $users = $user->getUsersByLocation($loggedInUserLocationId);
 
 include 'sidebar.php';
@@ -79,10 +88,7 @@ include 'sidebar.php';
                     echo "<td>" . $row['firstname'] . " " . $row['lastname'] . "</td>";
                     echo "<td>" . $row['email'] . "</td>";
                     echo "<td>";
-                    echo "<a href='javascript:void(0);' onclick='viewTasks(" . $row['id'] . ")'>View Tasks</a>";
-                    echo "<button onclick='addUser(" . $row['id'] . ")'>Add User</button>";
-                    echo "<button onclick='editUser(" . $row['id'] . ")'>Edit</button>";
-                    echo "<button onclick='deleteUser(" . $row['id'] . ")'>Delete</button>";
+                    echo "<button onclick='viewTasks(" . $row['id'] . ")'>Assign tasks</button>";
                     echo "</td>";
                     echo "</tr>";
                 }
@@ -100,15 +106,11 @@ include 'sidebar.php';
     </div>
 
     <script>
-            function addUser(userId) {
-        // Redirect to add_user.php with the user ID as a query parameter
-        window.location.href = 'add_user.php?userId=' + userId;
-    }
         function viewTasks(userId) {
             $.ajax({
-                url: 'tasks.php',
+                url: 'get_user_tasks.php',
                 type: 'GET',
-                data: { userid: userId },
+                data: { userID: userId },
                 success: function(response){
                     $('#tasks-popup-content').html(response);
                     $('#tasks-popup').show();
@@ -119,30 +121,6 @@ include 'sidebar.php';
             });
         }
 
-        function editUser(userId) {
-            // Redirect to edit user page with user ID
-            window.location.href = "edit_user.php?userid=" + userId;
-        }
-
-        function deleteUser(userId) {
-            // Confirm before deleting the user
-            if (confirm("Are you sure you want to delete this user?")) {
-                // Perform AJAX request to delete user
-                $.ajax({
-                    url: "delete_user.php",
-                    type: "POST",
-                    data: { userid: userId },
-                    success: function(response) {
-                        // Reload the page after successful deletion
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            }
-        }
-
         $(document).ready(function(){
             $('#close-popup').click(function(){
                 $('#tasks-popup').hide();
@@ -151,3 +129,5 @@ include 'sidebar.php';
     </script>
 </body>
 </html>
+
+

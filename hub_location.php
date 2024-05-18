@@ -2,14 +2,14 @@
 require_once './classes/Location.class.php';
 require_once './classes/Task.class.php'; 
 require_once './classes/db.class.php';
-require_once './classes/SessionManager.class.php';
+require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 
 
-$email = SessionManager::getSession('email');
+$email = Session::getSession('email');
 $user = new User($db->getConnection());
 $user_role = $user->getUserRole($email);
-SessionManager::setSession('firstname', $user->getFirstName($email));
+Session::setSession('firstname', $user->getFirstName($email));
 
 $db->closeConnection();
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {

@@ -1,21 +1,13 @@
 <?php
-require_once 'config.php';
+require_once './classes/Location.class.php';
+require_once './classes/Task.class.php'; 
+require_once './classes/db.class.php'; 
+require_once './classes/Session.class.php';
+require_once './classes/User.class.php';
+include 'sidebar.php';
 
-$sql_locations = "SELECT id, name FROM locations";
-$result_locations = $conn->query($sql_locations);
-
-if ($result_locations->num_rows > 0) {
-    $location_options = array();
-    while ($row_location = $result_locations->fetch_assoc()) {
-        $location_id = $row_location['id'];
-        $location_name = $row_location['name'];
-        $location_options[] = "<option value='$location_id'>$location_name</option>";
-    }
-
-    $location_options_html = implode('', $location_options);
-} else {
-    $location_options_html = "<option value=''>No locations found</option>";
-}
+$userManager = new User($conn);
+$locationManager = new Location($conn);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstname = $_POST['firstname'];
@@ -23,42 +15,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
     $hub_location_id = $_POST['hub_location']; 
-    $typeOfUser = "manager"; 
 
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    $sql_insert_user = "INSERT INTO users (firstname, lastname, typeOfUser, email, password, phoneNumber) VALUES (?, ?, ?, ?, ?, '')";
-    $stmt_insert_user = $conn->prepare($sql_insert_user);
-    $stmt_insert_user->bind_param("sssss", $firstname, $lastname, $typeOfUser, $email, $hashed_password);
-
-    if ($stmt_insert_user->execute()) {
-        $user_id = $stmt_insert_user->insert_id;
-        $sql_insert_relation = "INSERT INTO user_location (user_id, location_id) VALUES (?, ?)";
-        $stmt_insert_relation = $conn->prepare($sql_insert_relation);
-        $stmt_insert_relation->bind_param("ii", $user_id, $hub_location_id);
-        
-        if ($stmt_insert_relation->execute()) {
-            header("Location: manager.php");
-            exit();
-        } else {
-
-            echo "Error: " . $sql_insert_relation . "<br>" . $conn->error;
-        }
-    } else {
-
-        echo "Error: " . $sql_insert_user . "<br>" . $conn->error;
-    }
-
-    $stmt_insert_user->close();
-    if (isset($stmt_insert_relation)) {
-        $stmt_insert_relation->close();
-    }
+    $userManager->addHubManager($firstname, $lastname, $email, $password, $hub_location_id);
 }
 
-$sql_managers = "SELECT * FROM users WHERE typeOfUser = 'manager'";
-$result_managers = $conn->query($sql_managers);
-
+$location_options_html = $userManager->getLocationsOptions();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,6 +55,5 @@ $result_managers = $conn->query($sql_managers);
             <input type="submit" value="Submit">
         </form>
     </div>
-
 </body>
 </html>

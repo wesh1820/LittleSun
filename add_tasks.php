@@ -1,28 +1,23 @@
 <?php
-require_once 'config.php';
+require_once './classes/Task.class.php'; 
+require_once './classes/db.class.php';
+require_once './classes/Session.class.php';
+require_once './classes/User.class.php';
 
-// Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $task_name = $_POST['task_name']; // Assuming your form has a field named task_name
+    $task_name = $_POST['task_name'];
 
-    // Insert task into the database
-    $sql_insert_task = "INSERT INTO tasks (TaskName) VALUES (?)";
-    $stmt_insert_task = $conn->prepare($sql_insert_task);
-    $stmt_insert_task->bind_param("s", $task_name);
+    $taskManager = new Task($conn);
 
-    if ($stmt_insert_task->execute()) {
-        // Redirect after successful insertion
-        header("Location: index.php"); // Replace 'index.php' with the actual name of your index page
+    if ($taskManager->addTask($task_name)) {
+        header("Location: tasks.php"); 
         exit();
     } else {
-        echo "Error: " . $sql_insert_task . "<br>" . $conn->error;
+        echo "Error: Failed to add task.";
     }
-
-    // Close prepared statement
-    $stmt_insert_task->close();
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,6 +37,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <input type="submit" value="Add Task">
         </form>
     </div>
-
 </body>
 </html>
