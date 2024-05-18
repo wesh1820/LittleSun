@@ -63,28 +63,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Add User to Task</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+       
+       select,
+       input {
+        padding: 10px;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 16px;
+       }
+
+       input {
+        width: 97%;
+       }
+    </style>
+
+
+
 </head>
 <body>
     <div class="container">
         <h2>Add User to Task</h2>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <label for="selected_user">Select User:</label>
+            <label for="selected_user">Select User</label>
             <select id="selected_user" name="selected_user" required>
                 <?php echo $user_options_html; ?>
             </select><br>
 
-            <label for="selected_task">Select Task:</label>
+            <label for="selected_task">Select Task</label>
             <select id="selected_task" name="selected_task" required>
                 <?php echo $task_options_html; ?>
             </select><br>
 
-            <label for="date">Date:</label>
+            <label for="date">Date</label>
             <input type="date" id="date" name="date" required><br>
 
-            <label for="start_time">Start Time:</label>
+            <label for="start_time">Start Time</label>
             <input type="time" id="start_time" name="start_time" required><br>
 
-            <label for="end_time">End Time:</label>
+            <label for="end_time">End Time</label>
             <input type="time" id="end_time" name="end_time" required><br>
 
             <input type="submit" value="Assign Task">

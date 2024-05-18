@@ -54,6 +54,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Login - Your Site</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <style>
+
+    * {
+        background-color: #F8F8F8;
+    }
+        
+    .container {
+        margin: 0;
+    }
+
+    .logo {
+        display: flex;
+        justify-content: center; /* Centreert het logo horizontaal */
+        margin-bottom: 20px; /* Optioneel: ruimte onder het logo */
+    }
+
+    .logo img {
+    display: block;
+    }
+
+    .title, form {
+        margin-left: 10px; /* Optioneel: behoud de linker marge voor de rest van de inhoud */
+    }
+
+    </style>
+
 </head>
 <body>
 <div class="container">
@@ -61,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <img src="../LittleSun/css/images/Logo.svg" alt="Logo">
 </div>
 
-    <h2>Welcome back! Let's get started.</h2>
+    <h2 class="title">Welcome back! Let's get started.</h2>
     <?php if(isset($error)): ?>
         <div><?php echo $error; ?></div>
     <?php endif; ?>

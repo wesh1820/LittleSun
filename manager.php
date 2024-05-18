@@ -27,7 +27,10 @@ if (isset($_SESSION['email'])) {
     <title>Hub Managers</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+
+    </style>
+
 </head>
 <body>
 <div class="container">    
@@ -55,7 +58,13 @@ if (isset($_SESSION['email'])) {
     }
     ?>
 </div>
+<div class="hamburger-icon">
+    <i class="fas fa-bars"></i>
+</div>
 <div class="sidebar">
+<div class="logo-sidebar">
+        <img src="../LittleSun/css/images/Logo.svg" alt="Logo">
+    </div>
     <?php
 
     include 'sidebar.php';
@@ -74,26 +83,24 @@ if (isset($_SESSION['email'])) {
 </div>
 
 
-</body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-$(document).ready(function() {
-   
+    $(document).ready(function() {
+        $(".hamburger-icon").click(function() {
+        $(".sidebar").toggleClass("sidebar-open");
+    });
     $(".add-button").click(function() {
-       
-        $("#popup-content").load("add_manager.php");
-        
+        $("#popup-content").load("add_user.php");
         $("#myModal").css("display", "block");
     });
-
     $(".close, .modal").click(function() {
         $("#myModal").css("display", "none");
     });
-   
     $(".modal-content").click(function(event) {
         event.stopPropagation();
     });
 });
 </script>
 
+</body>
 </html>

@@ -105,67 +105,92 @@ if ($result_days_off) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
-/* Calendar grid */
-.calendar {
-    border: 1px solid #ccc;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 columns for each day of the week */
-    gap: 5px; /* Gap between cells */
-}
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+        overflow: hidden;
+    }
 
-/* Day header */
-.day-header {
-    text-align: center;
-    font-weight: bold;
-}
+    .container {
+        max-width: 1200px;
+        margin: 120px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-/* Day cell */
-.day-cell {
-    border: 1px solid #ccc;
-    padding: 5px;
-    text-align: center;
-}
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
 
-/* Empty cell */
-.empty-cell {
-    border: none;
-}
 
-/* Weekdays */
-.weekdays {
-    display: flex;
-    background-color: #e6e6e6;
-}
+    .navigation {
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-.weekday {
-    flex: 1;
-    padding: 10px;
-    text-align: center;
-}
+    .navigation a {
+        padding: 12px 20px;
+        margin: 0 3px;
+        text-decoration: none;
+        color: #333;
+        border: none;
+        border-radius: 5px;
+        background-color: #e9ca01;
+        transition: background-color 0.3s ease;
+    }
 
-/* Days */
-.days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-}
+    .navigation a:hover {
+        color: #fff;
+        background-color: #333;
+    }
 
-.day {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ccc;
-}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 40px;
+    }
 
-/* Empty cell */
-.empty-cell {
-    border: none;
-}
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
 
-.task {
-    background-color: #726278;
-    padding: 5px;
-    margin-bottom: 5px;
-}
+    th {
+        background-color: #f2f2f2;
+    }
+
+    td {
+        vertical-align: top;
+    }
+
+    .task-container {
+        margin-bottom: 20px;
+    }
+
+    .task {
+        margin-bottom: 10px;
+        margin-top: 5px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .task strong {
+        color: #333;
+    }
+
+    .task p {
+        margin: 5px 0;
+    }
+
 
 </style>
 </head>

@@ -37,6 +37,6 @@ class Database {
 }
 
 // Usage:
-$db = new Database('localhost', 'root', '', 'Littlesun');
+$db = new Database('localhost', 'root', 'root', 'Littlesun');
 
 ?>
