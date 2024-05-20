@@ -1,15 +1,18 @@
 <?php
+require_once './classes/Location.class.php';
 require_once './classes/Task.class.php'; 
 require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
+
 $email = Session::getSession('email');
-$user = new User($db->getConnection());
+$user = new User($conn);
 $user_role = $user->getUserRole($email);
 Session::setSession('firstname', $user->getFirstName($email));
-
-$db->closeConnection();
 
 $taskManager = new Task($conn);
 
@@ -47,7 +50,7 @@ $tasks = $taskManager->getAllTasks();
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
         <label for="task_name">New Task:</label>
         <input type="text" id="task_name" name="task_name" required>
-        <button type="submit" name="add_task">Add Task</button>
+        <button class="view-button" type="submit" name="add_task">Add Task</button>
     </form>
 
     <?php if (!empty($tasks)): ?>
@@ -60,10 +63,10 @@ $tasks = $taskManager->getAllTasks();
                 <tr>
                     <td><?php echo $task['TaskName']; ?></td>
                     <td>
-                        <a href="edit_task.php?id=<?php echo $task['TaskID']; ?>">Edit</a>
+                        <a href="edit_task.php?id=<?php echo $task['TaskID']; ?>" class="view-button">Edit</a>
                         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" style="display: inline-block;">
                             <input type="hidden" name="task_id" value="<?php echo $task['TaskID']; ?>">
-                            <button type="submit" name="delete_task">Delete</button>
+                            <button type="submit" name="delete_task" class="view-button">Delete</button>
                         </form>
                     </td>
                 </tr>

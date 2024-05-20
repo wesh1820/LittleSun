@@ -1,11 +1,15 @@
 <?php
-require_once './classes/Clock.class.php'; // Include the ClockManager class
+require_once './classes/Location.class.php';
 require_once './classes/Task.class.php'; 
-require_once './classes/db.class.php'; // Include the Database class
+require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
-include 'sidebar.php';
+require_once './classes/clock.class.php';
+require './sidebar.php';
 
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
 $email = Session::getSession('email');
 $user = new User($db->getConnection());
 $user_role = $user->getUserRole($email);

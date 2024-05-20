@@ -84,7 +84,7 @@ public function getLocationId($userId) {
     
     public function getUsersByLocation($locationId) {
         // Prepare and execute a query to get users based on their location
-        $query = "SELECT * FROM users WHERE id IN (SELECT user_id FROM user_location WHERE location_id = ?)";
+        $query = "SELECT * FROM users WHERE id IN (SELECT user_id FROM user_location WHERE location_id = ?) AND typeofuser = 'user'";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $locationId);
         $stmt->execute();
@@ -93,6 +93,35 @@ public function getLocationId($userId) {
         return $result;
     }
     
+
+// Method to search managers by first or last name
+public function searchManagers($search) {
+    try {
+        // Prepare the query to search for managers by first or last name
+        $query = "SELECT * FROM users WHERE firstname LIKE ? OR lastname LIKE ?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            // Output detailed error message if prepare fails
+            echo "Prepare failed: " . $this->conn->error;
+            return false;
+        }
+        // Bind the search parameter to the query
+        $searchParam = '%' . $search . '%';
+        $stmt->bind_param('ss', $searchParam, $searchParam);
+        // Execute the query
+        $stmt->execute();
+        // Return the result set
+        return $stmt->get_result();
+    } catch (Exception $e) {
+        // Handle exception
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+
+
+
 
     
 
@@ -193,24 +222,23 @@ public function getLocationId($userId) {
     // Method to add hub manager
     public function addHubManager($firstname, $lastname, $email, $password, $hub_location_id) {
         $typeOfUser = "manager"; 
-
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-        $sql_insert_user = "INSERT INTO users (firstname, lastname, typeOfUser, email, password, phoneNumber) VALUES (?, ?, ?, ?, ?, '')";
+    
+        $sql_insert_user = "INSERT INTO users (firstname, lastname, typeOfUser, email, password, Profilepic, phoneNumber) VALUES (?, ?, ?, ?, ?, 'default_profile_pic.jpg', '')";
         $stmt_insert_user = $this->conn->prepare($sql_insert_user);
         $stmt_insert_user->bind_param("sssss", $firstname, $lastname, $typeOfUser, $email, $hashed_password);
-
+    
         if ($stmt_insert_user->execute()) {
             $user_id = $stmt_insert_user->insert_id;
             $sql_insert_relation = "INSERT INTO user_location (user_id, location_id) VALUES (?, ?)";
             $stmt_insert_relation = $this->conn->prepare($sql_insert_relation);
             $stmt_insert_relation->bind_param("ii", $user_id, $hub_location_id);
-
+    
             $success = $stmt_insert_relation->execute();
             $stmt_insert_relation->close();
             
             $stmt_insert_user->close();
-
+    
             if ($success) {
                 header("Location: manager.php");
                 exit();
@@ -221,6 +249,7 @@ public function getLocationId($userId) {
             echo "Error: " . $sql_insert_user . "<br>" . $this->conn->error;
         }
     }
+    
     public function getAllTasksWithUserCheck($user_id) {
         $sql = "SELECT tasks.TaskID, tasks.TaskName, 
                 CASE WHEN ut.UserID IS NULL THEN 0 ELSE 1 END AS HasTask
@@ -282,6 +311,80 @@ public function getLocationId($userId) {
                 // Print error message and terminate script
                 die("Error in executing statement: " . $stmtInsert->error);
             }
+        }
+    }
+    public function getManagerById($manager_id) {
+        $query = "SELECT * FROM users WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $manager_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return false;
+        }
+    }
+    public function updateManager($manager_id, $firstname, $lastname, $email) {
+        $query = "UPDATE users SET firstname=?, lastname=?, email=? WHERE id=?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            // Handle query preparation error
+            echo "Error: " . $this->conn->error;
+            return false;
+        }
+        $stmt->bind_param("sssi", $firstname, $lastname, $email, $manager_id);
+        $result = $stmt->execute();
+        if (!$result) {
+            // Handle query execution error
+            echo "Error: " . $stmt->error;
+            return false;
+        } else {
+            return true;
+        }
+    }
+    public function getUserLocation($email) {
+        $sql = "SELECT location FROM users WHERE email = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['location'];
+        } else {
+            return null; // Or handle the case where location is not found
+        }
+    }
+    public function getManagerLocationId($manager_firstname) {
+        $sql = "SELECT location_id FROM user_location INNER JOIN locations ON user_location.location_id = locations.id INNER JOIN users ON user_location.user_id = users.id WHERE users.firstname = '$manager_firstname'";
+        $result = $this->conn->query($sql);
+
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['location_id'];
+        } else {
+            // Handle error or return a default value
+            return null;
+        }
+    }
+    public function deleteManager($manager_id) {
+        $query = "DELETE FROM users WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            // Handle query preparation error
+            echo "Error: " . $this->conn->error;
+            return false;
+        }
+        $stmt->bind_param("i", $manager_id);
+        $result = $stmt->execute();
+        if (!$result) {
+            // Handle query execution error
+            echo "Error: " . $stmt->error;
+            return false;
+        } else {
+            return true;
         }
     }
 }

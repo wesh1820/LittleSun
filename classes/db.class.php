@@ -1,30 +1,33 @@
 <?php
 class Database {
-    private $host;
-    private $username;
-    private $password;
-    private $dbname;
-    protected $conn;
+    private static $instance = null;
+    private $conn;
 
-    public function __construct($host, $username, $password, $dbname) {
-        $this->host = $host;
-        $this->username = $username;
-        $this->password = $password;
-        $this->dbname = $dbname;
-        $this->connect(); // Automatically connect upon instantiation
+    private function __construct() {
+        $config = [
+            'host' => 'localhost',
+            'username' => 'root',
+            'password' => '',
+            'dbname' => 'littlesun'
+        ];
+        $this->connect($config);
     }
 
-    private function connect() {
-        $this->conn = new mysqli($this->host, $this->username, $this->password, $this->dbname);
+    private function connect($config) {
+        $this->conn = new mysqli($config['host'], $config['username'], $config['password'], $config['dbname']);
         if ($this->conn->connect_error) {
             die("Connection failed: " . $this->conn->connect_error);
         }
     }
 
-    public function getConnection() {
-        if (!$this->conn) {
-            $this->connect();
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
         }
+        return self::$instance;
+    }
+
+    public function getConnection() {
         return $this->conn;
     }
 
@@ -32,11 +35,23 @@ class Database {
         if ($this->conn) {
             $this->conn->close();
             $this->conn = null;
+            self::$instance = null;
         }
     }
+
+    public function query($sql, $params = []) {
+        $stmt = $this->conn->prepare($sql);
+        if ($params) {
+            $types = str_repeat('s', count($params)); // Assuming all parameters are strings, adjust accordingly
+            $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        return $stmt->get_result();
+    }
+
+    public function fetch($sql, $params = []) {
+        $result = $this->query($sql, $params);
+        return $result->fetch_assoc();
+    }
 }
-
-// Usage:
-$db = new Database('localhost', 'root', '', 'Littlesun');
-
 ?>

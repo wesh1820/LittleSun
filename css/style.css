@@ -10,12 +10,12 @@ body {
 
 .container {
     flex: 1;
-    padding: 20px;
+    padding: 50px;
     margin-left: 250px; /* Ruimte voor de sidebar */
 }
 
 .container h2 {
-    margin-top: -50px;
+    margin-top: -17px;
     margin-bottom: 40px;
     text-align: left;
 }
@@ -36,13 +36,25 @@ body {
     border-radius: 6px;
     margin-left: 6px;
 }
-
+.view-button {
+    background-color: #e9ca01;
+    border: none;
+    color: #000000;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
 form input[type="text"],
 form input[type="password"],
 form input[type="email"],
 form input[type="hub_location"],
 form input[type="file"] {
-    width: calc(100% - 24px);
+    width: calc(89% - 24px);
     padding: 12px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
@@ -50,7 +62,6 @@ form input[type="file"] {
 }
 
 form input[type="submit"] {
-    width: 100%;
     padding: 12px;
     background-color: #111311;
     color: white;
@@ -68,14 +79,14 @@ form input[type="submit"]:hover {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 180px;
+    margin-top: 68px;
 }
 
 table th,
 table td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: center;
 }
 
 table th {
@@ -145,8 +156,8 @@ table a:hover {
 }
 
 .sidebar a {
-    padding: 10px 15px;
-    margin-top: 50px;
+    padding: 2px 15px;
+    margin-top: 35px;
     text-decoration: none;
     font-size: 18px;
     color: #ddd;
@@ -155,7 +166,6 @@ table a:hover {
 }
 
 .sidebar a:hover {
-    padding: 15px;
     background-color: #e9ca01;
     color: #141414;
     border-radius: 12px;
@@ -163,11 +173,8 @@ table a:hover {
 
 .sidebar i {
     font-size: 24px;
-    display: flex;
     flex-direction: row;
     gap: 12px;
-    /* margin-bottom: 5px; */
-    /* padding-left: 15px; */
 }
 
 .hamburger-icon {
@@ -209,7 +216,86 @@ table a:hover {
         display: block;
     }
 }
+.profile-pic {
+    text-align: center;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column; /* Plaats de tekst onder de afbeelding */
+    align-items: center;
+    position: relative; /* Zorgt ervoor dat de positie van het potloodpictogram relatief is aan dit element */
+}
 
+.profile-pic img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    object-fit: cover; /* Past de afbeelding perfect binnen het beschikbare gebied */
+}
+
+.profile-info {
+    margin-top: 10px;
+    text-align: center;
+    color: #fff;
+    font-size: 10px;
+}
+.editprofile{
+    text-align: center;
+}
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #000; /* Adjust the color as needed */
+}
+.close-btn:hover {
+    color: #ff0000; /* Change color on hover if desired */
+}
+
+.edit-profile-link{
+    position: absolute;
+    top: 50%;
+    right: -20px; /* Afstand vanaf de rechterrand van de profielfoto */
+    transform: translateY(-50%);
+    color:#e9ca01;
+    margin-top: -3px;
+    
+}
+.edit-profile-tekst{
+    color: #000000;
+    
+}
+
+.edit-profile-{
+    color: #000;
+}
+
+
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .popup-content {
+            background-color: #fff;
+            width: 250px;
+            /* height: 422px; */
+            position: absolute;
+            top: 25%;
+            left: 28%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 10px;
+        }
 /* Modal styling */
 .modal {
     display: none;
@@ -225,9 +311,9 @@ table a:hover {
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
+        background-color: #ffffff;
+        margin: 15% auto;
+        padding: 20px;
     border: 1px solid #888;
     width: 80%;
 }
@@ -261,7 +347,7 @@ table a:hover {
 }
 
 .calendar {
-    background: #323232;
+    background: #000000;
     color: #FFF;
     width: 100%;
     font-family: 'Oxygen';
@@ -379,6 +465,79 @@ table a:hover {
 .calendar .event-summary-row {
     display: block;
 }
+.calendar {
+    border: 1px solid #ccc;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns for each day of the week */
+    gap: 5px; /* Gap between cells */
+}
+
+/* Day header */
+.day-header {
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Day cell */
+.day-cell {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: center;
+}
+
+/* Empty cell */
+.empty-cell {
+    border: none;
+}
+
+.profile-info {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.profile-info p {
+    margin: 5px 0;
+    font-size: 20px;
+}
+/* Weekdays */
+.weekdays {
+    display: flex;
+    background-color: #e6e6e6;
+}
+
+.weekday {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Days */
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.day {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+/* Empty cell */
+.empty-cell {
+    border: none;
+}
+
+.task {
+    background-color: #e9ca01;
+    padding: 5px;
+    margin-bottom: 5px;
+    color: black;
+}
+
+
+
 
 @media screen and (max-width:768px) {
     .weekly-calendar-container {

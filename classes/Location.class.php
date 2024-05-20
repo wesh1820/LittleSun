@@ -35,7 +35,20 @@ class Location {
 
         $stmt->close();
     }
-
+    public function searchLocations($searchQuery) {
+        $query = "SELECT * FROM locations WHERE name LIKE ? OR city LIKE ? OR country LIKE ?";
+        $stmt = $this->conn->prepare($query);
+        if ($stmt) {
+            $searchParam = '%' . $searchQuery . '%';
+            $stmt->bind_param('sss', $searchParam, $searchParam, $searchParam);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } else {
+            echo "Prepare failed: " . $this->conn->error;
+            return false;
+        }
+    }
     public function addLocation($name, $city, $country) {
         $status = 1;
         $default_image = "default.jpg";
@@ -81,7 +94,7 @@ class Location {
            
             return true;
         } else {
-            
+
             return false;
         }
     }

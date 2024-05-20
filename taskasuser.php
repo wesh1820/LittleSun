@@ -10,8 +10,17 @@
 <body>
 <div class="container">
     <?php
-    require_once "config.php";
-    require_once './classes/Task.class.php'; // Include the TaskManager class
+require_once './classes/Location.class.php';
+require_once './classes/Task.class.php'; 
+require_once './classes/db.class.php';
+require_once './classes/Session.class.php';
+require_once './classes/User.class.php';
+require_once './classes/clock.class.php';
+require './sidebar.php';
+
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
     include 'sidebar.php';
 
     class UserTask {
@@ -22,18 +31,30 @@
         }
 
         public function getUserTasksAndTimeSlots($user_id) {
-            $sql = "SELECT time_slots.TimeSlotID, tasks.TaskName, time_slots.StartSlot, time_slots.EndSlot, time_slots.Date, time_slots.Sick
-                    FROM UserTasks
-                    INNER JOIN tasks ON UserTasks.TaskID = tasks.TaskID
-                    INNER JOIN time_slots ON UserTasks.TaskID = time_slots.TaskID
-                    WHERE UserTasks.UserID = ? AND time_slots.UserID = ?";
+            $sql = "SELECT 
+                        time_slots.TimeSlotID, 
+                        tasks.TaskName, 
+                        time_slots.StartSlot, 
+                        time_slots.EndSlot, 
+                        time_slots.Date, 
+                        time_slots.Sick
+                    FROM 
+                        UserTasks
+                    INNER JOIN 
+                        tasks ON UserTasks.TaskID = tasks.TaskID
+                    INNER JOIN 
+                        time_slots ON UserTasks.TaskID = time_slots.TaskID
+                    WHERE 
+                        UserTasks.UserID = ? 
+                        AND time_slots.UserID = ? 
+                        AND time_slots.Sick = 0";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("ii", $user_id, $user_id);
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
-                echo "<h2>Your Tasks and Time Slots:</h2>";
+                echo "<h3>Your Tasks and Time Slots:</h3>";
                 echo "<table border='1'>";
                 echo "<tr><th>Task Name</th><th>Start Time</th><th>End Time</th><th>Date</th><th>Sick</th><th>Action</th></tr>";
                 while ($row = $result->fetch_assoc()) {
@@ -46,7 +67,7 @@
                     echo "<td>
                             <form method='POST' action=''>
                                 <input type='hidden' name='timeslot_id' value='" . $row['TimeSlotID'] . "'>
-                                <button type='submit' name='mark_sick'>Mark as Sick</button>
+                                <button class='view-button' type='submit' name='mark_sick'>Mark as Sick</button>
                             </form>
                           </td>";
                     echo "</tr>";
@@ -101,7 +122,7 @@
         echo "<form method='POST' action=''>
                 <label for='date'>Date:</label>
                 <input type='date' name='date' required>
-                <button type='submit' name='mark_sick_day'>Mark as Sick for the Whole Day</button>
+                <button class='view-button' type='submit' name='mark_sick_day'>Mark as Sick for the Whole Day</button>
               </form>";
 
         $userTasks->getUserTasksAndTimeSlots($user_id);

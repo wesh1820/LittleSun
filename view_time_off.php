@@ -1,3 +1,26 @@
+<?php
+require_once './classes/db.class.php';
+require_once './classes/User.class.php';
+require_once './classes/Session.class.php';
+require './sidebar.php';
+
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
+
+// Fetch user email from session
+$email = Session::getSession('email');
+$user = new User($conn);
+
+    // Retrieve all time off requests from the database excluding those with status 1
+    $stmt = $conn->prepare("SELECT timeoff.*, users.firstname, users.lastname 
+                            FROM timeoff 
+                            JOIN users ON timeoff.UserID = users.id 
+                            JOIN user_location ON users.id = user_location.user_id
+                            WHERE timeoff.Status != 1");
+    $stmt->execute();
+    $result = $stmt->get_result();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,47 +48,12 @@
     </style>
 </head>
 <body>
-    <?php 
-    // Include the Timeoff class and establish database connection
-    require_once './classes/time_off.class.php'; 
-
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "littlesun";
-    
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $user = new Timeoff($conn);
-
-    // Handle form submissions
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        if (isset($_POST['action'])) {
-            $request_id = $_POST['request_id'];
-            if ($_POST['action'] == 'accept') {
-                $user->updateStatus($request_id, 1);
-            } elseif ($_POST['action'] == 'deny') {
-                $user->updateStatus($request_id, 0);
-            }
-            header("Location: " . $_SERVER['PHP_SELF']);
-            exit();
-        }
-    }
-
-    // Retrieve all time off requests excluding those with status 1
-    $time_off_requests = $user->getTimeOffRequests();
-    ?>
-
     <div class="sidebar">
         <?php include 'sidebar.php'; ?>
     </div>
     <div class="container">
         <h1>Time Off Requests</h1>
-        <?php if (!empty($time_off_requests)): ?>
+        <?php if ($result->num_rows > 0): ?>
             <table>
                 <tr>
                     <th>User</th>
@@ -77,24 +65,24 @@
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
-                <?php foreach ($time_off_requests as $request): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
                     <tr>
-                        <td><?= htmlspecialchars($request['firstname'] . ' ' . htmlspecialchars($request['lastname'])) ?></td>
-                        <td><?= htmlspecialchars($request['Timeoff_reason']) ?></td>
-                        <td><?= htmlspecialchars($request['Start_date']) ?></td>
-                        <td><?= htmlspecialchars($request['End_date']) ?></td>
-                        <td><?= htmlspecialchars($request['Start_time']) ?></td>
-                        <td><?= htmlspecialchars($request['End_time']) ?></td>
-                        <td><?= htmlspecialchars($request['Status']) ?></td>
+                        <td><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) ?></td>
+                        <td><?= htmlspecialchars($row['Timeoff_reason']) ?></td>
+                        <td><?= htmlspecialchars($row['Start_date']) ?></td>
+                        <td><?= htmlspecialchars($row['End_date']) ?></td>
+                        <td><?= htmlspecialchars($row['Start_time']) ?></td>
+                        <td><?= htmlspecialchars($row['End_time']) ?></td>
+                        <td><?= htmlspecialchars($row['Status']) ?></td>
                         <td>
                             <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="POST">
-                                <input type="hidden" name="request_id" value="<?= htmlspecialchars($request['ID']) ?>">
-                                <button type="submit" name="action" value="accept">Accept</button>
-                                <button type="submit" name="action" value="deny">Deny</button>
+                                <input type="hidden" name="request_id" value="<?= htmlspecialchars($row['ID']) ?>">
+                                <button class="view-button" type="submit" name="action" value="accept">Accept</button>
+                                <button class="view-button" type="submit" name="action" value="deny">Deny</button>
                             </form>
                         </td>
                     </tr>
-                <?php endforeach; ?>
+                <?php endwhile; ?>
             </table>
         <?php else: ?>
             <p>No time off requests found.</p>

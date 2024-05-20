@@ -1,30 +1,32 @@
 <?php
-require_once 'config.php';
+require_once './classes/User.class.php'; // Include the UserManager class
+require_once './classes/db.class.php';
+require_once './classes/Session.class.php';
 
-// Check if ID parameter is set in the URL
-if (isset($_GET['id'])) {
+// Check if the manager ID is provided in the URL
+if(isset($_GET['id']) && !empty($_GET['id'])) {
     $manager_id = $_GET['id'];
+    
+    // Delete the manager from the database
+    $userManager = new User($db->getConnection());
+    $result = $userManager->deleteManager($manager_id); // Assuming a method deleteManager exists in User class
 
-    // Delete manager from the database
-    $sql_delete_manager = "DELETE FROM users WHERE id = ?";
-    $stmt_delete_manager = $conn->prepare($sql_delete_manager);
-    $stmt_delete_manager->bind_param("i", $manager_id);
-
-    if ($stmt_delete_manager->execute()) {
-        // Redirect back to index.php after successful deletion
-        header("Location: manager.php");
-        exit();
+    if($result) {
+        // Manager deleted successfully
+        echo "<script>alert('Manager deleted successfully');</script>";
     } else {
-        // Error handling
-        echo "Error deleting manager: " . $conn->error;
+        // Failed to delete manager
+        echo "<script>alert('Failed to delete manager');</script>";
     }
 
-    $stmt_delete_manager->close();
+    // Redirect to the page where managers are listed
+    echo "<script>window.location.href = 'manager.php';</script>";
+    exit;
 } else {
-    // Redirect back to index.php if ID parameter is not set
-    header("Location: manager.php");
-    exit();
+    // Manager ID not provided in URL
+    echo "<script>alert('Manager ID not provided');</script>";
+    // Redirect to the page where managers are listed
+    echo "<script>window.location.href = 'manager.php';</script>";
+    exit;
 }
-
-$conn->close();
 ?>

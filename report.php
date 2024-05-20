@@ -1,94 +1,278 @@
 <?php
 require_once './classes/db.class.php';
-require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
+require_once './classes/Session.class.php';
 require './sidebar.php';
 
-// Instantiate DB class
+// Instantiate the database
+$db = Database::getInstance();
 $conn = $db->getConnection();
 
+// Fetch user email from session
 $email = Session::getSession('email');
-
-// Fetch user role to check if the user is admin
 $user = new User($conn);
-$user_role = $user->getUserRole($email);
 
-// Check if the user is an admin
-if ($user_role !== 'admin') {
-    echo "Access denied. Only admin can view this page.";
-    exit;
+// Vervolg van je code...
+
+
+// Get the ID van de ingelogde gebruiker
+$loggedInUserId = $_SESSION['user_id']; // Pas dit aan op basis van hoe je de gebruiker identificeert
+
+// Haal de locatie ID van de ingelogde gebruiker op
+$loggedInUserLocationId = $user->getLocationId($loggedInUserId);
+
+// Haal alleen de gebruikers op van de locatie van de ingelogde gebruiker
+$users = $user->getUsersByLocation($loggedInUserLocationId);
+
+// Database verbinding instellen
+$host = 'localhost';
+$db = 'Littlesun';
+$user = 'root';
+$pass = '';
+$charset = 'utf8mb4';
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (\PDOException $e) {
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 
-// Get the current month and year
-$month = isset($_GET['month']) ? intval(date('n', strtotime($_GET['month']))) : date('n');
-$year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+// Function to get Sick hours
+function getSickHours($pdo, $date, $userId) {
+    $query = "SELECT SUM(TIMESTAMPDIFF(HOUR, Start_time, End_time)) AS total_sick_hours
+              FROM timeoff
+              WHERE Timeoff_reason = 'Sick'
+              AND Start_date <= :date";
+    if ($userId !== null) {
+        $query .= " AND UserID = :user_id";
+    }
+    $stmt = $pdo->prepare($query);
+    $params = [':date' => $date];
+    if ($userId !== null) {
+        $params[':user_id'] = $userId;
+    }
+    $stmt->execute($params);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result['total_sick_hours'] ?? 0;
+}
 
-// Calculate the first and last date of the month
-$first_day_of_month = date('Y-m-01', strtotime("$year-$month-01"));
-$last_day_of_month = date('Y-m-t', strtotime("$year-$month-01"));
+// Function to get Time Off hours
+function getTimeOffHours($pdo, $date, $userId) {
+    $query = "SELECT SUM(TIMESTAMPDIFF(HOUR, StartSlot, EndSlot)) AS total_time_off_hours
+              FROM time_slots
+              WHERE Sick = 1
+              AND Date = :date";
+    if ($userId !== null) {
+        $query .= " AND UserID = :user_id";
+    }
+    $stmt = $pdo->prepare($query);
+    $params = [':date' => $date];
+    if ($userId !== null) {
+        $params[':user_id'] = $userId;
+    }
+    $stmt->execute($params);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result['total_time_off_hours'] ?? 0;
+}
 
-// Fetch sick time slots and user information from the database for the selected month
-$sql = "SELECT u.firstname, u.lastname, ts.StartSlot, ts.EndSlot, ts.Date
-        FROM time_slots ts
-        INNER JOIN users u ON ts.UserID = u.id
-        WHERE ts.Sick = 1 AND ts.Date BETWEEN ? AND ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $first_day_of_month, $last_day_of_month);
-$stmt->execute();
-$result = $stmt->get_result();
+// Functie om rapporten weer te geven met filters// Functie om rapporten weer te geven met filters
+function displayReport($pdo, $filters) {
+    $query = "SELECT u.firstname, u.lastname, ts.TaskID, t.TaskName, ts.Date, ts.StartSlot, ts.EndSlot, ts.UserID
+              FROM users u
+              JOIN Time_slots ts ON u.id = ts.UserID
+              JOIN Tasks t ON ts.TaskID = t.TaskID
+              WHERE 1=1";
+    
+    // Add dynamic filters
+    $params = [];
+    
+    if (!empty($filters['user_id'])) {
+        $query .= " AND u.id = :user_id";
+        $params[':user_id'] = $filters['user_id'];
+    }
+    
+    if (!empty($filters['start_date'])) {
+        $query .= " AND ts.Date >= :start_date";
+        $params[':start_date'] = $filters['start_date'];
+    }
+    
+    if (!empty($filters['end_date'])) {
+        $query .= " AND ts.Date <= :end_date";
+        $params[':end_date'] = $filters['end_date'];
+    }
+    
+    if (!empty($filters['task_type'])) {
+        $query .= " AND t.TaskID = :task_type";
+        $params[':task_type'] = $filters['task_type'];
+    }
+    
+    $query .= " ORDER BY ts.Date ASC";
 
-$sick_users = array();
-$total_sick_hours = 0;
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $start_time = new DateTime($row['StartSlot']);
-        $end_time = new DateTime($row['EndSlot']);
-        $interval = $start_time->diff($end_time);
-        $hours = $interval->h + ($interval->i / 60); // Convert minutes to fractional hours
-        
-        // Add user to sick_users array or update their total sick hours
-        $user_name = $row['firstname'] . ' ' . $row['lastname'];
-        if (!isset($sick_users[$user_name])) {
-            $sick_users[$user_name] = $hours;
-        } else {
-            $sick_users[$user_name] += $hours;
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Initialize total sick and time off hours variables
+    $total_sick_hours = 0;
+    $total_time_off_hours = 0;
+    
+    if (count($results) > 0) {
+        echo "<table border='1'>";
+        echo "<tr><th>User</th><th>Task</th><th>Date</th><th>Start Time</th><th>End Time</th><th>Sick Hours</th><th>Time off Hours</th><th>Overtime (hours)</th></tr>";
+        foreach ($results as $row) {
+            // Calculate sick hours for the current user and task
+            $sickHours = getSickHours($pdo, $row['Date'], $row['UserID']);
+            $total_sick_hours += $sickHours; // Add to total sick hours
+            
+            // Calculate time off hours for the current user and task
+            $timeOffHours = getTimeOffHours($pdo, $row['Date'], $row['UserID']);
+            $total_time_off_hours += $timeOffHours; // Add to total time off hours
+            
+            // Display the row with data
+            echo "<tr>
+                    <td>{$row['firstname']} {$row['lastname']}</td>
+                    <td>{$row['TaskName']}</td>
+                    <td>{$row['Date']}</td>
+                    <td>{$row['StartSlot']}</td>
+                    <td>{$row['EndSlot']}</td>
+                    <td>{$timeOffHours}</td>
+                    <td>{$sickHours}</td>
+                    <td>Calculated overtime hours</td>
+                  </tr>";
         }
-
-        // Update total sick hours
-        $total_sick_hours += $hours;
+        // Display the total sick and time off hours at the bottom of the table
+        echo "<tr><td colspan='5'><strong>Total time Off:</strong></td><td><strong>{$total_sick_hours}</strong></td></tr>";
+        echo "<tr><td colspan='5'><strong>Total Sick Hours Hours:</strong></td><td><strong>{$total_time_off_hours}</strong></td></tr>";
+        echo "</table>";
+    } else {
+        echo "<p>No records found for the given criteria.</p>";
     }
 }
-?>
 
+
+// Haal de gebruikers en taaktypen op voor dropdowns
+function getUsers($pdo) {
+    $stmt = $pdo->prepare("SELECT id, firstname, lastname FROM users WHERE status = 1");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getTaskTypes($pdo) {
+// Function to get Task Types
+$stmt = $pdo->prepare("SELECT TaskID, TaskName FROM Tasks");
+$stmt->execute();
+return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Functie om overuren te berekenen
+function calculateOvertime($pdo, $userId, $month) {
+$query = "SELECT SUM(TIMESTAMPDIFF(HOUR, ts.StartSlot, ts.EndSlot)) AS total_hours
+          FROM Time_slots ts
+          WHERE ts.UserID = :user_id
+          AND MONTH(ts.Date) = :month
+          AND ts.EndSlot > '17:00:00'"; // 17:00:00 is het einde van de werkdag
+
+$stmt = $pdo->prepare($query);
+$stmt->execute([
+    ':user_id' => $userId,
+    ':month' => $month,
+]);
+
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+$total_hours = $result['total_hours'] ?? 0;
+
+// Standaard uren per maand, aan te passen aan de daadwerkelijke standaard uren
+$standard_hours_per_month = 160;
+
+// Bereken overuren
+$overtime_hours = $total_hours - $standard_hours_per_month;
+
+return $overtime_hours;
+}
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sick Hours Report</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<title>Reports Dashboard</title>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="container">
-    <h2>Sick Hours Report for <?php echo date('F Y', strtotime("$year-$month-01")); ?></h2>
-    <form method="GET" action="">
-        <label for="month">Select Month:</label>
-        <input type="month" id="month" name="month" value="<?php echo isset($_GET['month']) ? htmlspecialchars($_GET['month']) : date('Y-m'); ?>">
-        <label for="year">Select Year:</label>
-        <input type="number" id="year" name="year" min="1970" max="2100" value="<?php echo isset($_GET['year']) ? htmlspecialchars($_GET['year']) : date('Y'); ?>">
-        <button type="submit">View</button>
-    </form>
-
-    <h2>Sick Users and Total Sick Hours:</h2>
-    <h3><strong>Total Sick Hours for All Users:</strong> <?php echo number_format($total_sick_hours, 2) . ' hours'; ?></h3>
-    <ul>
-        <?php foreach ($sick_users as $user_name => $total_hours): ?>
-            <li><?php echo $user_name . ': ' . number_format($total_hours, 2) . ' hours'; ?></li>
-        <?php endforeach; ?>
-       
-    </ul>
+<div class="sidebar">
+    <?php include 'sidebar.php'; ?>
 </div>
-</body>
-</html>
+<div class="container">
+<nav>
+<h2> Let's start generating a report.</h2>
+<form method="GET" style="display: flex; align-items: center;">
+    <label for="user_id">User:</label>
+    <select name="user_id" id="user_id">
+        <option value="">All</option>
+        <?php
+        // Retrieving users from the database
+        $users = getUsers($pdo);
+        // Displaying user options in the dropdown
+        foreach ($users as $user) {
+            echo "<option value=\"{$user['id']}\">{$user['firstname']} {$user['lastname']}</option>";
+        }
+        ?>
+    </select>
+    
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" id="start_date">
+    
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" id="end_date">
+    
+    <label for="task_type">Task Type:</label>
+    <select name="task_type" id="task_type">
+        <option value="">All</option>
+        <?php
+        // Retrieving task types from the database
+        $taskTypes = getTaskTypes($pdo);
+        // Displaying task type options in the dropdown
+        foreach ($taskTypes as $type) {
+            echo "<option value=\"{$type['TaskID']}\">{$type['TaskName']}</option>";
+        }
+        ?>
+    </select>
+    
+    <button class="view-button" type="submit">Generate Report</button>
+</form>
+
+<?php
+// Checking if the form is submitted and filters are set
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && (isset($_GET['user_id']) || isset($_GET['start_date']) || isset($_GET['end_date']) || isset($_GET['task_type']))) {
+    // Creating an array with filters based on user input
+    $filters = [
+        'user_id' => $_GET['user_id'] ?? '',
+        'start_date' => $_GET['start_date'] ?? '',
+        'end_date' => $_GET['end_date'] ?? '',
+        'task_type' => $_GET['task_type'] ?? '',
+    ];
+    // Calling the function to display the report with applied filters
+    displayReport($pdo, $filters);
+} else {
+    // Displaying a message if no filters are set
+    echo "<h3>Please select filters to generate the report.</h3>";
+}
+?>
+    </select>
+</form>
+
+</nav>
+<div>
+
+        </div>
+        </div>
+        </body>
+        </html>

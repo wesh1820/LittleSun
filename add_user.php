@@ -1,15 +1,17 @@
 <?php
-require_once 'config.php';
-include 'sidebar.php';
-// Start de sessie
-session_start();
+require_once './classes/db.class.php';
+require_once './classes/User.class.php';
+require_once './classes/Session.class.php';
+require './sidebar.php';
 
-// Controleer of de gebruiker is ingelogd
-if(!isset($_SESSION['user_id'])) {
-    // Als de gebruiker niet is ingelogd, stuur ze terug naar de inlogpagina
-    header("Location: login.php");
-    exit();
-}
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
+
+// Fetch user email from session
+$email = Session::getSession('email');
+$user = new User($conn);
+
 
 // Haal de gebruikers-ID op
 $user_id = $_SESSION['user_id'];

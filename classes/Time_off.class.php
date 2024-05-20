@@ -10,14 +10,35 @@ class Timeoff {
 
     
         // Method to retrieve all time-off requests except those with status 1, including user first and last names
-        public function getTimeOffRequests() {
+        public function getTimeOffRequests($manager_location_id) {
             $sql = "SELECT timeoff.*, users.firstname, users.lastname 
                     FROM timeoff 
                     JOIN users ON timeoff.UserID = users.id 
-                    WHERE timeoff.Status != 1";
-            $result = $this->conn->query($sql);
+                    JOIN user_location ON users.id = user_location.user_id
+                    WHERE user_location.location_id = ?";
+            $stmt = $this->conn->prepare($sql);
+            if (!$stmt) {
+                // Log or handle the SQL error
+                die("SQL error: " . $this->conn->error);
+            }
+            $stmt->bind_param("i", $manager_location_id);
+            if (!$stmt->execute()) {
+                // Log or handle the SQL error
+                die("Error executing query: " . $stmt->error);
+            }
+            $result = $stmt->get_result();
+            if (!$result) {
+                // Log or handle the SQL error
+                die("Error getting result set: " . $this->conn->error);
+            }
             return $result->fetch_all(MYSQLI_ASSOC);
         }
+        
+        
+        
+        
+        
+        
     
         // Method to update the status of a time-off request
         public function updateStatus($request_id, $status) {

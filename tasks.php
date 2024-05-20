@@ -10,9 +10,18 @@
     <h1>User Tasks</h1>
 
     <?php
-    require_once './classes/User.class.php';
-    require_once './classes/db.class.php';
-    require_once './classes/Task.class.php';
+require_once './classes/db.class.php';
+require_once './classes/User.class.php';
+require_once './classes/Session.class.php';
+
+
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
+
+// Fetch user email from session
+$email = Session::getSession('email');
+$user = new User($conn);
 
     // Check if userid is set and valid
     if (isset($_GET['userid']) && is_numeric($_GET['userid'])) {
@@ -28,7 +37,7 @@
         $tasks = $user->getAllTasksWithUserCheck($userid);
     } else {
         // If userid is not set or not valid, redirect to the users page
-        header("Location: users.php");
+        header("Location: task.php");
         exit();
     }
     ?>

@@ -1,15 +1,16 @@
 <?php
+
+require_once './classes/db.class.php';
+require_once './classes/User.class.php';
+require_once './classes/Session.class.php';
+
+// Instantiate the database
+$db = Database::getInstance();
+$conn = $db->getConnection();
 if (isset($_GET['userID'])) {
     $userID = intval($_GET['userID']);
 
-    // Verbinding met de database maken
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "littlesun";
 
-    // Maak verbinding met de database
-    $conn = new mysqli($servername, $username, $password, $dbname);
 
     // Controleren op verbinding
     if ($conn->connect_error) {

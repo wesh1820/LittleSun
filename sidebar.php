@@ -1,54 +1,107 @@
-<?php require_once './config.php'; // Assuming this file initializes $conn
-?>
+<?php
+require_once './config.php'; // Assuming this file initializes $conn
 
-<div class="sidebar">
-        <h2><i class="fas fa-columns"></i></h2>
-        <?php 
-        $sql = "SELECT * FROM locations";
-        $result = $conn->query($sql);
-        
-        $user_role = ""; 
-        if (isset($_SESSION['email'])) {
-            $email = $_SESSION['email'];
-            $sql_role = "SELECT typeOfUser FROM users WHERE email = '$email'";
+$user_role = ""; 
+$profile_pic = "";
+$user_firstname = "";
 
-            // $role = User::getRole($email)
-            $result_role = $conn->query($sql_role);
-            if ($result_role && $result_role->num_rows > 0) {
-                $row_role = $result_role->fetch_assoc();
-                $user_role = $row_role['typeOfUser'];
-            }
-        }
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $sql_role = "SELECT typeOfUser, profilepic, firstname FROM users WHERE id = '$user_id'";
 
-    if(1===1)
-
-    if ($user_role === 'admin') {
-        echo '<div class="sidebar">';
-        echo '<h2><i class="fas fa-columns"></i></h2>';
-        echo '<a href="manager.php"><i class="fas fa-user">Managers</i></a>';
-        echo '<a href="hub_location.php"><i class="fas fa-map-marker-alt">Locations</i></a>';
-        echo '<a href="task.php"><i class="fas fa-tasks">Tasks</i></a>';
-        echo '<a href="sick.php"><i class="fas fa-tasks">Sick</i></a>';
-        echo '<a href="logout.php"><i class="fas fa-sign-out-alt">Logout</i></a>';
-        echo '</div>';
-    } elseif ($user_role === 'manager') {
-        echo '<div class="sidebar">';
-        echo '<h2><i class="fas fa-columns"></i></h2>';
-        echo '<a href="user.php"><i class="fas fa-user">Users</i></a>';
-        echo '<a href="Tasky.php"><i class="fa fa-tasks"> tasks</i></a>';
-        echo '<a href="calender.php"><i class="fa fa-calendar-alt"> calender</i></a>';
-        echo '<a href="view_time_off.php"><i class="fa fa-calendar-alt"> Time off</i></a>';
-        echo '<a href="logout.php"><i class="fas fa-sign-out-alt">Logout</i></a>';
-        echo '</div>';
-} elseif ($user_role === 'user') {
-    echo '<div class="sidebar">';
-    echo '<h2><i class="fas fa-columns"></i></h2>';
-    echo '<a href="clockin.php"><i class="fas fa-tasks">Clockin</i></a>';
-    echo '<a href="taskasuser.php"><i class="fas fa-tasks">Tasks</i></a>';
-    echo '<a href="user_calender.php"><i class="fas fa-tasks">Calender</i></a>';
-    echo '<a href="ask_time_off.php"><i class="fas fa-tasks">Time Off</i></a>';
-    echo '<a href="logout.php"><i class="fas fa-sign-out-alt">Logout</i></a>';
-    echo '</div>';
+    $result_role = $conn->query($sql_role);
+    if ($result_role && $result_role->num_rows > 0) {
+        $row_role = $result_role->fetch_assoc();
+        $user_role = $row_role['typeOfUser'];
+        $profile_pic = $row_role['profilepic'];
+        $user_firstname = $row_role['firstname'];
+    }
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Include necessary CSS files here -->
+</head>
+<body>
+<div class="hamburger-icon">
+    <i class="fas fa-bars"></i>
+</div>
+<div class="sidebar">
+    <div class="logo-sidebar">
+        <img src="./uploads/Logo.svg" alt="Logo">
+    </div> 
+    <div class="profile-pic">
+        <div class="profile-img-container">
+            <img src="<?php echo htmlspecialchars($profile_pic); ?>" alt="Profile Picture" class="profile-img">
+            <p href="#" class="edit-profile-link" onclick="openPopup()"><i class="fas fa-pencil-alt"></i></p>
+        </div>
+        <?php if ($user_role) { ?>
+            <div class="profile-info">
+                <p><?php echo htmlspecialchars($user_role); ?>:</p>
+                <p><?php echo htmlspecialchars($user_firstname); ?></p>
+            </div>
+        <?php } ?>
     </div>
+
+    <div class="sidebar-content">
+        <?php 
+if ($user_role === 'admin') {
+    echo '<a href="manager.php"><i class="fas fa-users"></i> Managers</a>';
+    echo '<a href="hub_location.php"><i class="fas fa-map-marked-alt"></i> Locations</a>';
+    echo '<a href="task.php"><i class="fas fa-tasks"></i> Tasks</a>';
+    echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>';
+} elseif ($user_role === 'manager') {
+    echo '<a href="user.php"><i class="fas fa-user"></i> Users</a>';
+    echo '<a href="Tasky.php"><i class="fas fa-tasks"></i> Tasks</a>';
+    echo '<a href="calender.php"><i class="fas fa-calendar-alt"></i> Calendar</a>';
+    echo '<a href="report.php"><i class="fas fa-chart-bar"></i> Report</a>';
+    echo '<a href="sick.php"><i class="fas fa-bed"></i> Sick</a>';
+    echo '<a href="view_time_off.php"><i class="fas fa-hourglass-half"></i> Time Off</a>';
+    echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>';
+} elseif ($user_role === 'user') {
+    echo '<a href="clockin.php"><i class="fas fa-clock"></i> Clockin</a>';
+    echo '<a href="taskasuser.php"><i class="fas fa-tasks"></i> Tasks</a>';
+    echo '<a href="user_calender.php"><i class="fas fa-calendar-alt"></i> Calendar</a>';
+    echo '<a href="ask_time_off.php"><i class="fas fa-hourglass-half"></i> Time Off</a>';
+    echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>';
+}
+
+        ?>
+    </div>
+</div>
+
+<!-- Hidden pop-up window -->
+<div id="editProfilePopup" class="popup">
+    <div class="popup-content">
+        <div id="editProfileContent"></div>
+    </div>
+</div>
+
+<!-- Include necessary JavaScript files here -->
+<script>
+    // JavaScript function to open the pop-up window and load content via AJAX
+    function openPopup() {
+        document.getElementById('editProfilePopup').style.display = 'block';
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                document.getElementById('editProfileContent').innerHTML = xhr.responseText;
+            }
+        };
+        xhr.open('GET', 'edit_profile.php', true);
+        xhr.send();
+    }
+
+    // JavaScript function to close the pop-up window
+    function closePopup() {
+        document.getElementById('editProfilePopup').style.display = 'none';
+    }
+</script>
+</body>
+</html>
