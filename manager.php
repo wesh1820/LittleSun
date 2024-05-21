@@ -33,6 +33,13 @@ $db->closeConnection();
     <title>Hub Managers</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<<<<<<< HEAD
+=======
+    <style>
+
+    </style>
+
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 </head>
 <body>
 <div class="container">    
@@ -62,8 +69,21 @@ $db->closeConnection();
     }
     ?>
 </div>
+<div class="hamburger-icon">
+    <i class="fas fa-bars"></i>
+</div>
 <div class="sidebar">
+<<<<<<< HEAD
     <?php include 'sidebar.php'; ?>
+=======
+<div class="logo-sidebar">
+        <img src="../LittleSun/css/images/Logo.svg" alt="Logo">
+    </div>
+    <?php
+
+    include 'sidebar.php';
+    ?>
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 </div>
 
 <?php if ($user_role === 'admin') : ?>
@@ -77,23 +97,38 @@ $db->closeConnection();
   </div>
 </div>
 
+<<<<<<< HEAD
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
     $(".add-button").click(function() {
         $("#popup-content").load("add_manager.php");
+=======
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $(".hamburger-icon").click(function() {
+        $(".sidebar").toggleClass("sidebar-open");
+    });
+    $(".add-button").click(function() {
+        $("#popup-content").load("add_user.php");
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
         $("#myModal").css("display", "block");
     });
-
     $(".close, .modal").click(function() {
         $("#myModal").css("display", "none");
     });
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
     $(".modal-content").click(function(event) {
         event.stopPropagation();
     });
 });
 </script>
 
+</body>
 </html>

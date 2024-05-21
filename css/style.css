@@ -341,6 +341,7 @@ table a:hover {
 
 .clock-out-button {
     color: red;
+<<<<<<< HEAD
 }
 .weekly-calendar {
     min-width: 850px;
@@ -546,4 +547,6 @@ table a:hover {
         overflow-y: hidden;
         white-space: nowrap;
     }
+=======
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 }

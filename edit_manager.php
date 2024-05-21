@@ -11,6 +11,7 @@ if(isset($_GET['id']) && !empty($_GET['id'])) {
     $userManager = new User($db->getConnection());
     $manager_info = $userManager->getManagerById($manager_id); // Assuming a method getManagerById exists in User class
 
+<<<<<<< HEAD
     if($manager_info) {
         // Manager information retrieved successfully
         $firstname = $manager_info['firstname'];
@@ -51,6 +52,8 @@ if(isset($_GET['id']) && !empty($_GET['id'])) {
     echo "<script>window.location.href = 'managers.php';</script>";
     exit;
 }
+=======
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 ?>
 
 <!DOCTYPE html>
@@ -60,6 +63,7 @@ if(isset($_GET['id']) && !empty($_GET['id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Manager</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
+<<<<<<< HEAD
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -77,3 +81,66 @@ if(isset($_GET['id']) && !empty($_GET['id'])) {
     </div>
 </body>
 </html>
+=======
+    <style>
+        .pop-up-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }   
+
+        .form-edit label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-edit input[type="text"], .form-edit input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-edit input[type="submit"] {
+            margin-top: 10px;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="pop-up-container">    
+    <h2>Edit Manager</h2>
+    <form method="post">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname" value="<?php echo $row['firstname']; ?>" required>
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname" value="<?php echo $row['lastname']; ?>" required>
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" value="<?php echo $row['email']; ?>" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter new password">
+        <input type="submit" value="Update">
+    </form>
+</div>
+</body>
+</html>
+
+<?php
+
+$stmt_select_manager->close();
+$conn->close();
+?>
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d

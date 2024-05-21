@@ -68,6 +68,7 @@ include 'sidebar.php';
         <?php include 'sidebar.php'; ?>
     </div>
     <div class="container">
+        
         <h1>Users and Their Tasks</h1>
         <table>
             <thead>
@@ -126,10 +127,15 @@ include 'sidebar.php';
             // Redirect to edit user page with user ID
             window.location.href = "edit_user.php?userid=" + userId;
         }
+<<<<<<< HEAD
         </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
             function deleteUser(userId) {
+=======
+
+        function deleteUser(userId) {
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
             // Confirm before deleting the user
             if (confirm("Are you sure you want to delete this user?")) {
                 // Perform AJAX request to delete user
@@ -148,12 +154,16 @@ include 'sidebar.php';
             }
         }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
         $(document).ready(function(){
             $('#close-popup').click(function(){
                 $('#tasks-popup').hide();
             });
         });
+<<<<<<< HEAD
 $(document).ready(function() {
     $(".hamburger-icon").click(function() {
         $(".sidebar").toggleClass("sidebar-open");
@@ -174,3 +184,8 @@ $(document).ready(function() {
 </body>
 </html>
 
+=======
+    </script>
+</body>
+</html>
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d

@@ -54,4 +54,11 @@ class Database {
         return $result->fetch_assoc();
     }
 }
+<<<<<<< HEAD
+=======
+
+// Usage:
+$db = new Database('localhost', 'root', 'root', 'Littlesun');
+
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 ?>

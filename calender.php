@@ -111,6 +111,98 @@ if ($result_days_off) {
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+<<<<<<< HEAD
+=======
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+        overflow: hidden;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 120px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+
+    .navigation {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .navigation a {
+        padding: 12px 20px;
+        margin: 0 3px;
+        text-decoration: none;
+        color: #333;
+        border: none;
+        border-radius: 5px;
+        background-color: #e9ca01;
+        transition: background-color 0.3s ease;
+    }
+
+    .navigation a:hover {
+        color: #fff;
+        background-color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 40px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    td {
+        vertical-align: top;
+    }
+
+    .task-container {
+        margin-bottom: 20px;
+    }
+
+    .task {
+        margin-bottom: 10px;
+        margin-top: 5px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .task strong {
+        color: #333;
+    }
+
+    .task p {
+        margin: 5px 0;
+    }
+
+
+</style>
+>>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 </head>
 <body>
     
