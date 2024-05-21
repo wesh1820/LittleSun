@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+<?php
+    require_once './classes/User.class.php';
+    require_once './classes/db.class.php';
+    require_once './classes/Task.class.php';
+
+    if (isset($_GET['userid']) && is_numeric($_GET['userid'])) {
+        $userid = intval($_GET['userid']);
+        $user = new User($db->getConnection());
+        $userData = $user->getUserById($userid);
+        $tasks = $user->getAllTasksWithUserCheck($userid);
+    } 
+    ?><!DOCTYPE html>
 <html>
 <head>
     <title>User Tasks</title>
@@ -8,46 +19,11 @@
 <body>
     <div class="container">
     <h1>User Tasks</h1>
-
     <?php
-require_once './classes/db.class.php';
-require_once './classes/User.class.php';
-require_once './classes/Session.class.php';
-
-
-// Instantiate the database
-$db = Database::getInstance();
-$conn = $db->getConnection();
-
-// Fetch user email from session
-$email = Session::getSession('email');
-$user = new User($conn);
-
-    // Check if userid is set and valid
-    if (isset($_GET['userid']) && is_numeric($_GET['userid'])) {
-        $userid = intval($_GET['userid']);
-
-        // Create a new user instance
-        $user = new User($db->getConnection());
-
-        // Get user information
-        $userData = $user->getUserById($userid);
-
-        // Get all tasks with indication if the user has the task or not
-        $tasks = $user->getAllTasksWithUserCheck($userid);
-    } else {
-        // If userid is not set or not valid, redirect to the users page
-        header("Location: task.php");
-        exit();
-    }
-    ?>
-
-    <?php
-    // Show all tasks with a checkbox to indicate which tasks the user has
     if ($userData) {
         echo "<h2>Tasks for " . $userData['firstname'] . " " . $userData['lastname'] . "</h2>";
         if ($tasks) {
-            echo "<form method='post' action='update_user_tasks.php?userid=$userid'>"; // Updated form action
+            echo "<form method='post' action='update_user_tasks.php?userid=$userid'>";
             foreach ($tasks as $task) {
                 $checked = $task['HasTask'] ? 'checked' : '';
                 echo "<input type='checkbox' name='tasks[]' value='" . $task['TaskID'] . "' $checked>" . $task['TaskName'] . "<br>";

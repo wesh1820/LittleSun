@@ -2,23 +2,19 @@
 if (isset($_GET['userID'])) {
     $userID = intval($_GET['userID']);
 
-    // Verbinding met de database maken
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $dbname = "littlesun";
+    $dbname = "Littlesun";
 
-    // Maak verbinding met de database
     $conn = new mysqli($servername, $username, $password, $dbname);
 
-    // Controleren op verbinding
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Query om taken op te halen die aan de gebruiker zijn toegewezen
-    $sql = "SELECT tasks.TaskID, tasks.TaskName FROM tasks
-            JOIN UserTasks ON tasks.TaskID = UserTasks.TaskID
+    $sql = "SELECT Tasks.TaskID, Tasks.TaskName FROM Tasks
+            JOIN UserTasks ON Tasks.TaskID = UserTasks.TaskID
             WHERE UserTasks.UserID = $userID";
     
     $result = $conn->query($sql);
@@ -27,35 +23,30 @@ if (isset($_GET['userID'])) {
         die("Query failed: " . $conn->error);
     }
 
-    // Gebruikerstaken weergeven
-
     if ($result->num_rows > 0) {
 
-
-        // Formulier om nieuwe taak toe te voegen
         echo "<h4>Assign New Task</h4>";
         echo "<form action='assign_task.php' method='post'>
                 <input type='hidden' name='userID' value='$userID'>
                 <label for='taskID'>Select Task:</label>
                 <select name='taskID' id='taskID'>";
 
-        // Alleen taken ophalen die al aan de gebruiker zijn toegewezen
-        $sql = "SELECT tasks.TaskID, tasks.TaskName FROM tasks
-                JOIN UserTasks ON tasks.TaskID = UserTasks.TaskID
+        $sql = "SELECT Tasks.TaskID, Tasks.TaskName FROM Tasks
+                JOIN UserTasks ON Tasks.TaskID = UserTasks.TaskID
                 WHERE UserTasks.UserID = $userID";
         
-        $result_assigned_tasks = $conn->query($sql);
+        $result_assigned_Tasks = $conn->query($sql);
         
-        if (!$result_assigned_tasks) {
+        if (!$result_assigned_Tasks) {
             die("Query failed: " . $conn->error);
         }
 
-        if ($result_assigned_tasks->num_rows > 0) {
-            while ($row = $result_assigned_tasks->fetch_assoc()) {
+        if ($result_assigned_Tasks->num_rows > 0) {
+            while ($row = $result_assigned_Tasks->fetch_assoc()) {
                 echo "<option value='" . $row["TaskID"] . "'>" . $row["TaskName"] . "</option>";
             }
         } else {
-            echo "<option value='' disabled>No tasks available</option>";
+            echo "<option value='' disabled>No Tasks available</option>";
         }
         echo "</select><br><br>
                 <label for='startSlot'>Select Start Time Slot:</label>
@@ -92,10 +83,9 @@ if (isset($_GET['userID'])) {
                 <input type='submit' value='Assign Task'>
               </form>";
     } else {
-        echo "No tasks assigned to this user.";
+        echo "No Tasks assigned to this user.";
     }
 
-    // Sluit de databaseverbinding
     $conn->close();
 }
 ?>

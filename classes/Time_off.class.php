@@ -35,10 +35,6 @@ class Timeoff {
         }
         
         
-        
-        
-        
-        
     
         // Method to update the status of a time-off request
         public function updateStatus($request_id, $status) {

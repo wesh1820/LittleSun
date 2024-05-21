@@ -1,29 +1,25 @@
 <?php
-require_once './classes/db.class.php';
 require_once './classes/User.class.php';
+require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
 
-// Instantiate the database
-$db = Database::getInstance();
-$conn = $db->getConnection();
-
-// Fetch user email from session
-$email = Session::getSession('email');
-$user = new User($conn);
-
-// Get user role and set firstname in session
-$user_role = $user->getUserRole($email);
-Session::setSession('firstname', $user->getFirstName($email));
-
-// Fetch managers or search for managers
-$result_managers = $user->getManagers();
-if (isset($_GET['search'])) {
-    $search = $_GET['search'];
-    $result_managers = $user->searchManagers($search);
+$id = Session::getSession('id');
+$user = new User($db->getConnection());
+$user_role = $user->getUserRole($id);
+Session::setSession('id', $user->getID($id));
+$db->closeConnection();
+$userManager = new User($conn);
+$result_managers = $userManager->getManagers();
+$user_role = "";
+if (isset($_SESSION['id'])) {
+    $id = $_SESSION['id'];
+    $user_role = $userManager->getUserRole($id);
 }
 
-// Close the database connection
-$db->closeConnection();
+if (isset($_GET['search'])) {
+    $search = $_GET['search'];
+    $result_managers = $userManager->searchManagers($search); 
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,15 +29,11 @@ $db->closeConnection();
     <title>Hub Managers</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<<<<<<< HEAD
-=======
-    <style>
-
-    </style>
-
->>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 </head>
 <body>
+        <div class="sidebar">
+        <?php include 'sidebar.php'; ?>
+    </div>
 <div class="container">    
     <h2>Hub Managers</h2>
     <form method="GET">
@@ -50,6 +42,7 @@ $db->closeConnection();
     </form>
     <?php
     if ($result_managers->num_rows > 0) {
+
         echo "<table>";
         echo "<tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Actions</th></tr>";
         while ($row_manager = $result_managers->fetch_assoc()) {
@@ -64,30 +57,16 @@ $db->closeConnection();
             echo "</tr>";
         }
         echo "</table>";
+        
     } else {
+
         echo "<p>No hub managers found.</p>";
     }
     ?>
 </div>
-<div class="hamburger-icon">
-    <i class="fas fa-bars"></i>
-</div>
-<div class="sidebar">
-<<<<<<< HEAD
-    <?php include 'sidebar.php'; ?>
-=======
-<div class="logo-sidebar">
-        <img src="../LittleSun/css/images/Logo.svg" alt="Logo">
-    </div>
-    <?php
-
-    include 'sidebar.php';
-    ?>
->>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
-</div>
 
 <?php if ($user_role === 'admin') : ?>
-    <a class="add-button" href="#">Add Hub Manager</a>
+    <a class="add-button" href="#">Add</a>
 <?php endif; ?>
 
 <div id="myModal" class="modal">
@@ -96,39 +75,29 @@ $db->closeConnection();
     <div id="popup-content"></div>
   </div>
 </div>
-
-<<<<<<< HEAD
-</body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="./js/script.js"></script>
 <script>
+        $(document).ready(function(){
+            $('#close-popup').click(function(){
+                $('#tasks-popup').hide();
+            });
+        });
 $(document).ready(function() {
-    $(".add-button").click(function() {
-        $("#popup-content").load("add_manager.php");
-=======
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $(".hamburger-icon").click(function() {
+    $(".hamburger-icon").click(function() {
         $(".sidebar").toggleClass("sidebar-open");
     });
     $(".add-button").click(function() {
         $("#popup-content").load("add_user.php");
->>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
         $("#myModal").css("display", "block");
     });
     $(".close, .modal").click(function() {
         $("#myModal").css("display", "none");
     });
-<<<<<<< HEAD
-
-=======
->>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
     $(".modal-content").click(function(event) {
         event.stopPropagation();
     });
 });
 </script>
-
 </body>
 </html>

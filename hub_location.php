@@ -5,27 +5,19 @@ require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 
-// Instantiate the database
-$db = Database::getInstance();
-$conn = $db->getConnection();
+$id = Session::getSession('id');
+$user = new User($db->getConnection());
+$user_role = $user->getUserRole($id);
+Session::setSession('id', $user->getID($id));
 
-// Ensure user is logged in
+$db->closeConnection();
+
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: login.php");
     exit();
 }
 
-// Fetch user email from session
-$email = Session::getSession('email');
-$user = new User($conn);
-
-// Get user role and set firstname in session
-$user_role = $user->getUserRole($email);
-Session::setSession('firstname', $user->getFirstName($email));
-
-// Fetch locations
 $locationManager = new Location($conn);
-$locations = [];
 
 if (isset($_GET['search_query'])) {
     $searchQuery = $_GET['search_query'];
@@ -33,7 +25,26 @@ if (isset($_GET['search_query'])) {
 } else {
     $locations = $locationManager->getLocations();
 }
+
+$user_role = ""; 
+if (isset($_SESSION['id'])) {
+    $id = $_SESSION['id'];
+    $sql_role = "SELECT typeOfUser FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql_role);
+    if ($stmt) {
+        $stmt->bind_param('s', $id);
+        $stmt->execute();
+        $result_role = $stmt->get_result();
+        if ($result_role && $result_role->num_rows > 0) {
+            $row_role = $result_role->fetch_assoc();
+            $user_role = $row_role['typeOfUser'];
+        }
+    } else {
+        echo "Prepare failed: " . $conn->error;
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,10 +55,12 @@ if (isset($_GET['search_query'])) {
     <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
+        <div class="sidebar">
+        <?php include 'sidebar.php'; ?>
+    </div>
 <div class="container">    
     <h2>Hub Locations</h2>
-    
-    <!-- Search bar -->
+
     <form method="GET" action="">
         <input type="text" name="search_query" placeholder="Search locations">
         <button class="view-button" type="submit">Search</button>
@@ -76,10 +89,7 @@ if (isset($_GET['search_query'])) {
         ?>
     </table>
 </div>
-<div class="sidebar">
-    <?php include 'sidebar.php'; ?>
-</div>
-<a class="add-button" href="#">Add location</a>
+<a class="add-button" href="#">Add</a>
 
 <div id="myModal" class="modal">
   <div class="modal-content">
@@ -90,25 +100,27 @@ if (isset($_GET['search_query'])) {
 
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="./js/script.js"></script>
 <script>
+        $(document).ready(function(){
+            $('#close-popup').click(function(){
+                $('#tasks-popup').hide();
+            });
+        });
 $(document).ready(function() {
+    $(".hamburger-icon").click(function() {
+        $(".sidebar").toggleClass("sidebar-open");
+    });
     $(".add-button").click(function() {
-        $("#popup-content").load("add_hub_location.php");
+        $("#popup-content").load("add_user.php");
         $("#myModal").css("display", "block");
     });
-
     $(".close, .modal").click(function() {
         $("#myModal").css("display", "none");
     });
-
     $(".modal-content").click(function(event) {
         event.stopPropagation();
     });
 });
 </script>
 </html>
-
-<?php
-// Close the database connection at the very end of the script
-$db->closeConnection();
-?>

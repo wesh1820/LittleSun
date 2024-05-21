@@ -1,26 +1,22 @@
 <?php
 require_once './classes/db.class.php';
-require_once './classes/User.class.php';
-require_once './classes/Session.class.php';
-require './sidebar.php';
+require_once './classes/Task.class.php';
 
-// Instantiate the database
-$db = Database::getInstance();
+$db = new Database(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+$taskManager = new Task($db);
 $conn = $db->getConnection();
 
-// Fetch user email from session
-$email = Session::getSession('email');
-$user = new User($conn);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['action']) && in_array($_POST['action'], ['accept', 'deny'])) {
+        $request_id = $_POST['request_id'];
+        $new_status = $_POST['action'] == 'accept' ? 1 : 2;
+        echo $taskManager->updateStatus($request_id, $new_status);
+    }
+}
 
-    // Retrieve all time off requests from the database excluding those with status 1
-    $stmt = $conn->prepare("SELECT timeoff.*, users.firstname, users.lastname 
-                            FROM timeoff 
-                            JOIN users ON timeoff.UserID = users.id 
-                            JOIN user_location ON users.id = user_location.user_id
-                            WHERE timeoff.Status != 1");
-    $stmt->execute();
-    $result = $stmt->get_result();
+$result = $taskManager->getTimeOffRequests();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,23 +25,6 @@ $user = new User($conn);
     <title>Time Off Requests</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        button {
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body>
     <div class="sidebar">
@@ -53,7 +32,7 @@ $user = new User($conn);
     </div>
     <div class="container">
         <h1>Time Off Requests</h1>
-        <?php if ($result->num_rows > 0): ?>
+        <?php if ($db->numRows($result) > 0): ?>
             <table>
                 <tr>
                     <th>User</th>
@@ -65,7 +44,7 @@ $user = new User($conn);
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
-                <?php while ($row = $result->fetch_assoc()): ?>
+                <?php while ($row = $db->fetchAssoc($result)): ?>
                     <tr>
                         <td><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) ?></td>
                         <td><?= htmlspecialchars($row['Timeoff_reason']) ?></td>
@@ -85,8 +64,32 @@ $user = new User($conn);
                 <?php endwhile; ?>
             </table>
         <?php else: ?>
-            <p>No time off requests found.</p>
+            <p>No Time off requests found.</p>
         <?php endif; ?>
     </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="./js/script.js"></script>
+<script>
+    $(document).ready(function() {
+        $(".hamburger-icon").click(function() {
+            $(".sidebar").toggleClass("sidebar-open");
+        });
+        $(".add-button").click(function() {
+            $("#popup-content").load("add_user.php");
+            $("#myModal").css("display", "block");
+        });
+        $(".close, .modal").click(function() {
+            $("#myModal").css("display", "none");
+        });
+        $(".modal-content").click(function(event) {
+            event.stopPropagation();
+        });
+    });
+</script>
 </body>
 </html>
+
+<?php
+$db->closeConnection();
+?>

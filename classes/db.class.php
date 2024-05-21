@@ -1,33 +1,30 @@
 <?php
 class Database {
-    private static $instance = null;
-    private $conn;
+    private $host;
+    private $username;
+    private $password;
+    private $dbname;
+    protected $conn;
 
-    private function __construct() {
-        $config = [
-            'host' => 'localhost',
-            'username' => 'root',
-            'password' => '',
-            'dbname' => 'littlesun'
-        ];
-        $this->connect($config);
+    public function __construct($host, $username, $password, $dbname) {
+        $this->host = $host;
+        $this->username = $username;
+        $this->password = $password;
+        $this->dbname = $dbname;
+        $this->connect(); // Automatically connect upon instantiation
     }
 
-    private function connect($config) {
-        $this->conn = new mysqli($config['host'], $config['username'], $config['password'], $config['dbname']);
+    private function connect() {
+        $this->conn = new mysqli($this->host, $this->username, $this->password, $this->dbname);
         if ($this->conn->connect_error) {
-            die("Connection failed: " . $this->conn->connect_error);
+            throw new Exception("Connection failed: " . $this->conn->connect_error);
         }
-    }
-
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
     }
 
     public function getConnection() {
+        if (!$this->conn) {
+            $this->connect();
+        }
         return $this->conn;
     }
 
@@ -35,30 +32,27 @@ class Database {
         if ($this->conn) {
             $this->conn->close();
             $this->conn = null;
-            self::$instance = null;
         }
     }
 
-    public function query($sql, $params = []) {
-        $stmt = $this->conn->prepare($sql);
-        if ($params) {
-            $types = str_repeat('s', count($params)); // Assuming all parameters are strings, adjust accordingly
-            $stmt->bind_param($types, ...$params);
+    public function query($sql) {
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            throw new Exception("Query failed: " . $this->conn->error);
         }
-        $stmt->execute();
-        return $stmt->get_result();
+        return $result;
     }
 
-    public function fetch($sql, $params = []) {
-        $result = $this->query($sql, $params);
-        return $result->fetch_assoc();
+    public function fetchAssoc($result) {
+        $row = $result->fetch_assoc();
+        return $row;
+    }
+
+    public function numRows($result) {
+        return $result->num_rows;
     }
 }
-<<<<<<< HEAD
-=======
 
 // Usage:
-$db = new Database('localhost', 'root', 'root', 'Littlesun');
-
->>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
+$db = new Database('localhost', 'root', '', 'Littlesun');
 ?>

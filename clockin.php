@@ -1,19 +1,14 @@
 <?php
-require_once './classes/Location.class.php';
+require_once './classes/Clock.class.php'; 
 require_once './classes/Task.class.php'; 
-require_once './classes/db.class.php';
+require_once './classes/db.class.php'; 
 require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
-require_once './classes/clock.class.php';
-require './sidebar.php';
 
-// Instantiate the database
-$db = Database::getInstance();
-$conn = $db->getConnection();
-$email = Session::getSession('email');
+$id = Session::getSession('id');
 $user = new User($db->getConnection());
-$user_role = $user->getUserRole($email);
-Session::setSession('firstname', $user->getFirstName($email));
+$user_role = $user->getUserRole($id);
+Session::setSession('id', $user->getID($id));
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -33,11 +28,7 @@ if(isset($_POST['clock_out'])) {
 }
 
 $result = $clockManager->getUserRecords($user_id);
-
-// Check if user is currently clocked in
 $clocked_in = $clockManager->isClockedIn($user_id);
-
-// Close the database connection
 $db->closeConnection();
 ?>
 
@@ -47,19 +38,11 @@ $db->closeConnection();
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <title>Clock In/Out System</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-    </style>
 </head>
 <body>
+    <div class="sidebar">
+        <?php include 'sidebar.php'; ?>
+    </div>
     <div class="container">
         <h2>Clock In/Out</h2>
         
@@ -89,5 +72,29 @@ $db->closeConnection();
             ?>
         </table>
     </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+        $(document).ready(function(){
+            $('#close-popup').click(function(){
+                $('#tasks-popup').hide();
+            });
+        });
+$(document).ready(function() {
+    $(".hamburger-icon").click(function() {
+        $(".sidebar").toggleClass("sidebar-open");
+    });
+    $(".add-button").click(function() {
+        $("#popup-content").load("add_user.php");
+        $("#myModal").css("display", "block");
+    });
+    $(".close, .modal").click(function() {
+        $("#myModal").css("display", "none");
+    });
+    $(".modal-content").click(function(event) {
+        event.stopPropagation();
+    });
+});
+</script>
 </body>
 </html>

@@ -1,18 +1,15 @@
 <?php
-require_once './classes/Location.class.php';
-require_once './classes/Task.class.php'; 
+require_once './classes/Task.class.php';
 require_once './classes/db.class.php';
 require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 
-// Instantiate the database
-$db = Database::getInstance();
 $conn = $db->getConnection();
 
-$email = Session::getSession('email');
+$id = Session::getSession('id');
 $user = new User($conn);
-$user_role = $user->getUserRole($email);
-Session::setSession('firstname', $user->getFirstName($email));
+$user_role = $user->getUserRole($id);
+Session::setSession('id', $user->getID($id));
 
 $taskManager = new Task($conn);
 
@@ -42,11 +39,11 @@ $tasks = $taskManager->getAllTasks();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-<div class="container">
-    <h2>All Tasks</h2>
-    <div class="sidebar">
+        <div class="sidebar">
         <?php include 'sidebar.php'; ?>
     </div>
+<div class="container">
+    <h2>All Tasks</h2>
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
         <label for="task_name">New Task:</label>
         <input type="text" id="task_name" name="task_name" required>
@@ -76,5 +73,28 @@ $tasks = $taskManager->getAllTasks();
         <p>No tasks found.</p>
     <?php endif; ?>
 </div>
+<script>
+        $(document).ready(function(){
+            $('#close-popup').click(function(){
+                $('#tasks-popup').hide();
+            });
+        });
+$(document).ready(function() {
+    $(".hamburger-icon").click(function() {
+        $(".sidebar").toggleClass("sidebar-open");
+    });
+    $(".add-button").click(function() {
+        $("#popup-content").load("add_user.php");
+        $("#myModal").css("display", "block");
+    });
+    $(".close, .modal").click(function() {
+        $("#myModal").css("display", "none");
+    });
+    $(".modal-content").click(function(event) {
+        event.stopPropagation();
+    });
+});
+</script>
+<script src="./js/script.js"></script>
 </body>
 </html>

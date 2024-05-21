@@ -15,9 +15,9 @@ body {
 }
 
 .container h2 {
-    margin-top: -17px;
-    margin-bottom: 40px;
-    text-align: left;
+    margin-top: 3px;
+    margin-bottom: 50px;
+    text-align: center;
 }
 
 .container form label {
@@ -141,7 +141,7 @@ table a:hover {
     top: 0;
     left: 0;
     height: 100%;
-    padding-top: 20px;
+    padding-top: 46px;
     transition: width 0.3s;
     display: flex;
     flex-direction: column;
@@ -191,7 +191,20 @@ table a:hover {
 .hamburger-icon .fas {
     color: #333;
 }
-
+.view-button {
+    background-color: #e9ca01;
+    border: none;
+    color: #000000;
+    padding: 10px 18px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    /* width: 51px; */
+}
 
 
 /* Responsive styling */
@@ -201,11 +214,25 @@ table a:hover {
         padding-top: 0;
         overflow: hidden;
     }
+    .sidebar a {
+    padding: 0px 5px;
+    margin-top: 27px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #ddd;
+    display: block;
+    transition: color 0.3s;
+}
 
     .sidebar.sidebar-open {
-        width: 250px;
+        width: 180px;
         padding-top: 20px;
     }
+    .logoimg {
+    width: 108px;
+    margin-left: 62px;
+    margin-top: 9px;
+}
 
     .container {
         margin-left: 0;
@@ -341,7 +368,6 @@ table a:hover {
 
 .clock-out-button {
     color: red;
-<<<<<<< HEAD
 }
 .weekly-calendar {
     min-width: 850px;
@@ -536,9 +562,69 @@ table a:hover {
     margin-bottom: 5px;
     color: black;
 }
-
-
-
+#tasksy-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    z-index: 9999;
+}
+#tasks-popup {
+    display: none;
+    position: fixed;
+    top: 49%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    z-index: 9999;
+    width: 61%;
+}
+        #close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        .report-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .report-button button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .report-button button:hover {
+            background-color: #0056b3;
+        }
+        .editprofile {
+            position: relative;
+            padding: 20px;
+        }
+        .edit-profile-tekst {
+            margin-top: 0;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
 
 @media screen and (max-width:768px) {
     .weekly-calendar-container {
@@ -547,6 +633,4 @@ table a:hover {
         overflow-y: hidden;
         white-space: nowrap;
     }
-=======
->>>>>>> 9fd0143fa0023f17c58364575694595a0274282d
 }

@@ -60,6 +60,8 @@ class User {
             return null; // Location not found for the user
         }
     }
+    
+    
     // Method to get location ID from user
 public function getLocationId($userId) {
     // Controleer of de databaseverbinding is ingesteld
@@ -126,7 +128,7 @@ public function searchManagers($search) {
     
 
     // Method to get user first name based on email
-    public function getFirstName($email) {
+    public function getID($email) {
         $sql = "SELECT firstname FROM users WHERE email = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $email);
@@ -167,36 +169,27 @@ public function searchManagers($search) {
         }
     }
 
-    // Method to get user by ID
-    public function getUserById($id) {
-        $sql_select_manager = "SELECT id, firstname, lastname, email FROM users WHERE id = ?";
-        $stmt_select_manager = $this->conn->prepare($sql_select_manager);
-        $stmt_select_manager->bind_param("i", $id);
-        $stmt_select_manager->execute();
-        $result_manager = $stmt_select_manager->get_result();
-
-        if ($result_manager->num_rows !== 1) {
-            return false;
-        }
-
-        $row = $result_manager->fetch_assoc();
-        $stmt_select_manager->close();
-
-        return $row;
+    public function getUserById($userId) {
+        $stmt = $this->conn->prepare('SELECT * FROM users WHERE id = ?');
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
 
-    // Method to update user information
-    public function updateUser($id, $firstname, $lastname, $email, $password) {
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $sql_update_manager = "UPDATE users SET firstname = ?, lastname = ?, email = ?, password = ? WHERE id = ?";
-        $stmt_update_manager = $this->conn->prepare($sql_update_manager);
-        $stmt_update_manager->bind_param("ssssi", $firstname, $lastname, $email, $hashed_password, $id);
+public function updateUser($id, $firstname, $lastname, $email, $password) {
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $sql_update_manager = "UPDATE users SET firstname = ?, lastname = ?, email = ?, password = ? WHERE id = ?";
+    $stmt_update_manager = $this->conn->prepare($sql_update_manager);
+    $stmt_update_manager->bind_param("ssssi", $firstname, $lastname, $email, $hashed_password, $id);
 
-        $success = $stmt_update_manager->execute();
-        $stmt_update_manager->close();
+    $success = $stmt_update_manager->execute();
+    $stmt_update_manager->close();
 
-        return $success;
-    }
+    return $success;
+}
+
+    
 
     public function getAllLocationsOptionsHtml() {
         $location_options_html = "";
@@ -250,26 +243,27 @@ public function searchManagers($search) {
         }
     }
     
+    
     public function getAllTasksWithUserCheck($user_id) {
-        $sql = "SELECT tasks.TaskID, tasks.TaskName, 
+        $sql = "SELECT Tasks.TaskID, Tasks.TaskName, 
                 CASE WHEN ut.UserID IS NULL THEN 0 ELSE 1 END AS HasTask
-                FROM tasks
-                LEFT JOIN UserTasks ut ON tasks.TaskID = ut.TaskID AND ut.UserID = ?";
+                FROM Tasks
+                LEFT JOIN UserTasks ut ON Tasks.TaskID = ut.TaskID AND ut.UserID = ?";
         $stmt = $this->conn->prepare($sql);  // This is where the error occurs
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
     
-        $tasks = array();
+        $Tasks = array();
         while ($row = $result->fetch_assoc()) {
-            $tasks[] = array(
+            $Tasks[] = array(
                 "TaskID" => $row['TaskID'],
                 "TaskName" => $row['TaskName'],
                 "HasTask" => $row['HasTask']
             );
         }
     
-        return $tasks;
+        return $Tasks;
     }
     public function updateUserTasks($userid, $selectedTasks) {
         $sqlDelete = "DELETE FROM UserTasks WHERE UserID = ?";
@@ -291,7 +285,7 @@ public function searchManagers($search) {
             die("Error in executing statement: " . $stmtDelete->error);
         }
     
-        // Insert new user tasks
+        // Insert new user Tasks
         foreach ($selectedTasks as $taskId) {
             $sqlInsert = "INSERT INTO UserTasks (UserID, TaskID) VALUES (?, ?)";
             $stmtInsert = $this->conn->prepare($sqlInsert);
@@ -325,24 +319,13 @@ public function searchManagers($search) {
             return false;
         }
     }
-    public function updateManager($manager_id, $firstname, $lastname, $email) {
-        $query = "UPDATE users SET firstname=?, lastname=?, email=? WHERE id=?";
-        $stmt = $this->conn->prepare($query);
-        if (!$stmt) {
-            // Handle query preparation error
-            echo "Error: " . $this->conn->error;
-            return false;
-        }
-        $stmt->bind_param("sssi", $firstname, $lastname, $email, $manager_id);
-        $result = $stmt->execute();
-        if (!$result) {
-            // Handle query execution error
-            echo "Error: " . $stmt->error;
-            return false;
-        } else {
-            return true;
-        }
-    }
+public function updateManager($id, $firstname, $lastname, $email, $password) {
+    $sql = "UPDATE users SET firstname = ?, lastname = ?, email = ?, password = ? WHERE id = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bind_param("ssssi", $firstname, $lastname, $email, $password, $id);
+    return $stmt->execute();
+}
+
     public function getUserLocation($email) {
         $sql = "SELECT location FROM users WHERE email = ?";
         $stmt = $this->conn->prepare($sql);
@@ -356,6 +339,25 @@ public function searchManagers($search) {
         } else {
             return null; // Or handle the case where location is not found
         }
+    }
+    public function getSickUsersByDate($date) {
+        $sql = "SELECT users.firstname, users.lastname, Time_slots.StartSlot, Time_slots.EndSlot, Time_slots.TaskID
+                FROM Time_slots
+                INNER JOIN users ON Time_slots.UserID = users.id
+                WHERE Time_slots.Sick = 1 AND Time_slots.Date = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $date);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $sick_users = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $sick_users[] = $row;
+            }
+        }
+
+        return $sick_users;
     }
     public function getManagerLocationId($manager_firstname) {
         $sql = "SELECT location_id FROM user_location INNER JOIN locations ON user_location.location_id = locations.id INNER JOIN users ON user_location.user_id = users.id WHERE users.firstname = '$manager_firstname'";
@@ -385,6 +387,75 @@ public function searchManagers($search) {
             return false;
         } else {
             return true;
+        }
+    }
+    public function getUserTasksAndTimeSlots($user_id) {
+        $sql = "SELECT 
+                    Time_slots.TimeSlotID, 
+                    Tasks.TaskName, 
+                    Time_slots.StartSlot, 
+                    Time_slots.EndSlot, 
+                    Time_slots.Date, 
+                    Time_slots.Sick
+                FROM 
+                    UserTasks
+                INNER JOIN 
+                    Tasks ON UserTasks.TaskID = Tasks.TaskID
+                INNER JOIN 
+                    Time_slots ON UserTasks.TaskID = Time_slots.TaskID
+                WHERE 
+                    UserTasks.UserID = ? 
+                    AND Time_slots.UserID = ? 
+                    AND Time_slots.Sick = 0";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ii", $user_id, $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            echo "<h3>Your Tasks and Time Slots:</h3>";
+            echo "<table border='1'>";
+            echo "<tr><th>Task Name</th><th>Start Time</th><th>End Time</th><th>Date</th><th>Sick</th><th>Action</th></tr>";
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($row["TaskName"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["StartSlot"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["EndSlot"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["Date"]) . "</td>";
+                echo "<td>" . ($row["Sick"] ? "Yes" : "No") . "</td>";
+                echo "<td>
+                        <form method='POST' action=''>
+                            <input type='hidden' name='Timeslot_id' value='" . $row['TimeSlotID'] . "'>
+                            <button class='view-button' type='submit' name='mark_sick'>Mark as Sick</button>
+                        </form>
+                      </td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "No Tasks and Time slots found for this user.";
+        }
+    }
+
+    public function setSick($Timeslot_id) {
+        $sql = "UPDATE Time_slots SET Sick = 1 WHERE TimeSlotID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $Timeslot_id);
+        if ($stmt->execute()) {
+            echo "The selected Time slot has been marked as sick.";
+        } else {
+            echo "Error: " . $this->conn->error;
+        }
+    }
+
+    public function setSickForDay($user_id, $date) {
+        $sql = "UPDATE Time_slots SET Sick = 1 WHERE UserID = ? AND Date = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("is", $user_id, $date);
+        if ($stmt->execute()) {
+            echo "All Time slots for $date have been marked as sick.";
+        } else {
+            echo "Error: " . $this->conn->error;
         }
     }
 }

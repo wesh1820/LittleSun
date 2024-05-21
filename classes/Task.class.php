@@ -9,19 +9,19 @@ class Task {
     }
 
     public function getTasks() {
-        $sql_tasks = "SELECT TaskID, TaskName FROM tasks";
-        $result_tasks = $this->conn->query($sql_tasks);
-        $tasks = array();
-        if ($result_tasks->num_rows > 0) {
-            while ($row_task = $result_tasks->fetch_assoc()) {
-                $tasks[] = new Task($row_task['TaskID'], $row_task['TaskName']);
+        $sql_Tasks = "SELECT TaskID, TaskName FROM Tasks";
+        $result_Tasks = $this->conn->query($sql_Tasks);
+        $Tasks = array();
+        if ($result_Tasks->num_rows > 0) {
+            while ($row_task = $result_Tasks->fetch_assoc()) {
+                $Tasks[] = new Task($row_task['TaskID'], $row_task['TaskName']);
             }
         }
-        return $tasks;
+        return $Tasks;
     }
 
     public function getUserTasks() {
-        $sql = "SELECT ut.UserID, CONCAT(u.firstname, ' ', u.lastname) AS UserName, ut.TaskID, t.TaskName, ut.Date, ut.StartTime, ut.EndTime FROM UserTasks ut JOIN users u ON ut.UserID = u.id JOIN tasks t ON ut.TaskID = t.TaskID";
+        $sql = "SELECT ut.UserID, CONCAT(u.firstname, ' ', u.lastname) AS UserName, ut.TaskID, t.TaskName, ut.Date, ut.StartTime, ut.EndTime FROM UserTasks ut JOIN users u ON ut.UserID = u.id JOIN Tasks t ON ut.TaskID = t.TaskID";
         $result = $this->conn->query($sql);
         $userTasks = array();
         if ($result->num_rows > 0) {
@@ -43,47 +43,47 @@ class Task {
         return $this->assignTask($userId, $taskId, $date, $startTime, $endTime);
     }
     public function addTask($taskName) {
-        $sql = "INSERT INTO tasks (TaskName) VALUES (?)";
+        $sql = "INSERT INTO Tasks (TaskName) VALUES (?)";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $taskName);
         return $stmt->execute();
     }
 
     public function deleteTask($taskId) {
-        $sql = "DELETE FROM tasks WHERE TaskID = ?";
+        $sql = "DELETE FROM Tasks WHERE TaskID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $taskId);
         return $stmt->execute();
     }
     public function updateTask($taskId, $newTaskName) {
-        $sql = "UPDATE tasks SET TaskName = ? WHERE TaskID = ?";
+        $sql = "UPDATE Tasks SET TaskName = ? WHERE TaskID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("si", $newTaskName, $taskId);
         return $stmt->execute();
     }
 
     public function getAllTasks() {
-        $sql = "SELECT * FROM tasks";
+        $sql = "SELECT * FROM Tasks";
         $result = $this->conn->query($sql);
         return ($result->num_rows > 0) ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
     public function getUsersWithTasks() {
-        $sql = "SELECT users.id AS user_id, users.firstname, users.lastname, users.email, tasks.taskname 
+        $sql = "SELECT users.id AS user_id, users.firstname, users.lastname, users.email, Tasks.taskname 
                 FROM users 
                 LEFT JOIN UserTasks ON users.id = UserTasks.userid
-                LEFT JOIN tasks ON UserTasks.taskid = tasks.taskid 
+                LEFT JOIN Tasks ON UserTasks.taskid = Tasks.taskid 
                 WHERE users.typeOfUser = 'user'";
         return $this->conn->query($sql);
     }
     public function updateUserTasks($userid, $selectedTasks) {
-        // Delete existing user tasks
+        // Delete existing user Tasks
         $sqlDelete = "DELETE FROM UserTasks WHERE UserID = ?";
         $stmtDelete = $this->conn->prepare($sqlDelete);
         $stmtDelete->bind_param("i", $userid);
         $stmtDelete->execute();
     
-        // Insert new user tasks
+        // Insert new user Tasks
         foreach ($selectedTasks as $taskId) {
             $sqlInsert = "INSERT INTO UserTasks (UserID, TaskID) VALUES (?, ?)";
             $stmtInsert = $this->conn->prepare($sqlInsert);
@@ -146,7 +146,7 @@ class Task {
                 }
                 echo "</table>";
             } else {
-                echo "No tasks found for this user.";
+                echo "No Tasks found for this user.";
             }
         }
     }
@@ -161,6 +161,27 @@ class Task {
         }
         return null;
     }
-    
+    public function updateStatus($request_id, $new_status) {
+        $stmt = $this->conn->prepare("UPDATE Timeoff SET Status = ? WHERE ID = ?");
+        $stmt->bind_param("ii", $new_status, $request_id);
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return "Status updated successfully to " . $new_status . ".";
+        } else {
+            $error = "Error updating status: " . $stmt->error;
+            $stmt->close();
+            return $error;
+        }
+    }
+
+    public function getTimeOffRequests() {
+        $sql = "SELECT Timeoff.*, users.firstname, users.lastname 
+                FROM Timeoff 
+                JOIN users ON Timeoff.UserID = users.id 
+                JOIN user_location ON users.id = user_location.user_id
+                WHERE Timeoff.Status != 1";
+        return $this->conn->query($sql);
+    }
 }
 ?>

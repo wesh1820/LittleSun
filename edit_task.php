@@ -5,7 +5,6 @@ require_once './classes/Session.class.php';
 require_once './classes/User.class.php';
 require './sidebar.php';
 
-// Controleer of de gebruiker is ingelogd
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: login.php");
     exit();
@@ -13,8 +12,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 $conn = $db->getConnection();
 $taskManager = new Task($conn);
-
-// Haal de taak-ID op uit de URL
 if (isset($_GET['id'])) {
     $taskId = $_GET['id'];
     $task = $taskManager->getTaskById($taskId);
@@ -28,13 +25,12 @@ if (isset($_GET['id'])) {
     exit();
 }
 
-// Update taakgegevens wanneer het formulier wordt ingediend
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_task'])) {
     $taskName = $_POST['task_name'];
     $taskId = $_POST['task_id'];
 
     $taskManager->updateTask($taskId, $taskName);
-    header("Location: tasks.php");
+    header("Location: task.php");
     exit();
 }
 ?>
