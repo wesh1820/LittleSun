@@ -173,3 +173,35 @@ $(document).ready(function() {
 
 
 
+
+            <!-- Tasks content will be loaded here -->
+        </div>
+        <span id="close-popup">&times;</span>
+    </div>
+
+    <script>
+        function viewTasks(userId) {
+            $.ajax({
+                url: 'get_user_tasks.php',
+                type: 'GET',
+                data: { userID: userId },
+                success: function(response){
+                    $('#tasks-popup-content').html(response);
+                    $('#tasks-popup').show();
+                },
+                error: function(xhr, status, error){
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+
+        $(document).ready(function(){
+            $('#close-popup').click(function(){
+                $('#tasks-popup').hide();
+            });
+        });
+    </script>
+</body>
+</html>
+
+
